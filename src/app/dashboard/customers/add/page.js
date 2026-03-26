@@ -10,15 +10,17 @@ import {
   MenuItem,
   Stack
 } from "@mui/material";
+import axios from "axios";  
 
 export default function AddCustomerPage() {
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phonenumber: "",
     city: "",
     state: "",
+    gstnumber: "",
     country: "",
     status: "Active",
     address: "",
@@ -31,17 +33,26 @@ export default function AddCustomerPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Customer Data:", formData);
+
+     console.log("Customer Data:", formData);
+
+    const res =  await axios.post("/dashboard/api",formData);   
+
+    console.log("Backend data:", res.data); 
+
+   
     alert("Customer Added Successfully!");
   };
+
+  
 
   return (
     <Box
       sx={{
-        maxWidth: "900px",   // 👉 wider form
-        mx: "auto",          // 👉 center horizontally
+        maxWidth: "900px",   
+        mx: "auto",          
       }}
     >
 
@@ -82,11 +93,11 @@ export default function AddCustomerPage() {
             />
 
             <TextField
-              label="Phone"
-              name="phone"
+              label="Phonenumber"
+              name="phonenumber"
               fullWidth
               required
-              value={formData.phone}
+              value={formData.phonenumber}
               onChange={handleChange}
             />
 
@@ -104,6 +115,14 @@ export default function AddCustomerPage() {
               fullWidth
               value={formData.state}
               onChange={handleChange}
+            />
+
+           <TextField
+             label="GST Number"
+             name="gstnumber"
+             fullWidth
+             value={formData.gstnumber}
+             onChange={handleChange}
             />
 
             <TextField

@@ -1,172 +1,164 @@
 "use client";
-import { useState } from "react";
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Paper,
-  Link,
-  Stack,
-  InputAdornment
-} from "@mui/material";
-import { useRouter } from "next/navigation";
-import EmailIcon from "@mui/icons-material/Email";
-import LockIcon from "@mui/icons-material/Lock";
+import React, { useState } from "react";
+import { TextField, Button, Typography } from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import Alert from '@mui/material/Alert';
 
+import {useRouter} from 'next/navigation';
 
+const SignInForm = () => {
 
-export default function SignIn() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
+  const [loading, setLoading] = useState(false);
+   const [success, setSuccess]= useState("");
+  const [error, setError] = useState("");
+     
+
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Login Data:", formData);
-  };
+  const onSubmit = async (data)=>{
 
+    try{
+
+    setSuccess('');
+      setError('');
+
+    setLoading(true);
+
+    const res = await axios.post("/api/signin_api", data);
+
+    
+
+    const gotToken = res.data.generatedToken;
+
+    console.log ("This is my token", gotToken);
+
+    localStorage.setItem("Token",gotToken);
+
+    if(res.status==200)
+  {
+  setSuccess("Signed up Successfully");
+
+     router.push('/dashboard');
+  }
+
+ 
+    
+  }
+
+
+  catch(err){
+     if(err.status==401)
+{
+  setError("Invalid password");
+}
+else{
+      setError("Signin Failed");
+}
+  }
+
+  finally{
+    setLoading(false);
+  }
+  }
+  
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg,#0f172a,#1e293b)",
-        display: "flex",
-        alignItems: "center",
+<>
+    
+  
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{
+        maxWidth: "600px",
+        margin: "10rem auto",
+        padding: "2rem",
+        border: "1px solid #ccc",
+        borderRadius: "8px",
       }}
     >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={0}
-          sx={{
-            p: 5,
-            borderRadius: "20px",
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#fff",
-          }}
-        >
-          <Stack spacing={3}>
 
-            {/* Title */}
-            <Box textAlign="center">
-              <Typography variant="h4" fontWeight="bold">
-                Welcome Back 👋
-              </Typography>
-              <Typography sx={{ color: "#94a3b8", mt: 1 }}>
-                Login to your ProLedger ERP account
-              </Typography>
-            </Box>
 
-            {/* Form */}
-            <Box component="form" onSubmit={handleSubmit}>
+    {success && <Alert severity="success">{success}</Alert>}
+    
+    {error && <Alert severity="error">{error}</Alert>}
 
-              <TextField
-                label="Email Address"
-                name="email"
-                type="email"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.email}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  input: { color: "#fff" },
-                  label: { color: "#94a3b8" },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": { borderColor: "#475569" },
-                    "&:hover fieldset": { borderColor: "#6366f1" },
-                  },
-                }}
-              />
+      <Typography variant="h5" gutterBottom>
+        Sign In
+      </Typography>
 
-              <TextField
-                label="Password"
-                name="password"
-                type="password"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.password}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  input: { color: "#fff" },
-                  label: { color: "#94a3b8" },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": { borderColor: "#475569" },
-                    "&:hover fieldset": { borderColor: "#6366f1" },
-                  },
-                }}
-              />
+      {/* Email */}
+      <Controller
+        name="email"
+        control={control}
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Invalid email format",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Email Address"
+            fullWidth
+            margin="normal"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+        )}
+      />
 
-              <Button
-              onClick={()=>router.push("/dashboard")}
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 3,
-                  py: 1.5,
-                  borderRadius: "12px",
-                  fontWeight: "bold",
-                  background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                }}
-              >
-                Sign In
-              </Button>
+      {/* Password */}
+      <Controller
+        name="password"
+        control={control}
+        rules={{
+          required: "Password is required",
+          minLength: {
+            value: 6,
+            message: "Password must be at least 6 characters",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+        )}
+      />
 
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                mt={2}
-              >
-                <Link
-                  href="/forgot-password"
-                  underline="hover"
-                  sx={{ color: "#94a3b8" }}
-                >
-                  Forgot Password?
-                </Link>
-
-                <Link
-                  href="/signup"
-                  underline="hover"
-                  sx={{ color: "#6366f1" }}
-                >
-                  Create Account
-                </Link>
-              </Stack>
-
-            </Box>
-          </Stack>
-        </Paper>
-      </Container>
-    </Box>
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        sx={{ mt: 2, backgroundColor: "#5d5877", color: "black" }}
+        disabled={loading}
+      >
+        {loading ? "Signing in..." : "SIGN IN"}
+      </Button>
+    </form>
+    </>
+    
   );
-}
+};
+
+export default SignInForm;

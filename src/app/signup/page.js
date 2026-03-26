@@ -1,222 +1,255 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
+import Alert from '@mui/material/Alert';
+
 import {
-  Container,
   TextField,
   Button,
+  FormControlLabel,
+  Checkbox,
+  FormGroup,
   Typography,
-  Box,
-  Paper,
-  Stack,
-  InputAdornment,
-  Link
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
 
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import LockIcon from "@mui/icons-material/Lock";
+import axios from "axios";
+import {useRouter} from 'next/navigation';
 
-export default function SignUp() {
-  const router = useRouter();
+export default function SignUpForm() {
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    mobile: "",
-    password: "",
-    confirmPassword: ""
+    const router = useRouter();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      confirmPassword: "",
+      terms: false,
+    },
   });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [success, setSuccess]= useState("");
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
+  const [error, setError] = useState("");
+
+  
+
+  const passwordValue = watch("password");
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+
+     try{
+      setSuccess('');
+      setError('');
+
+    setLoading(true);
+
+    const res = await axios.post("/api/signup_api",data);
+
+    console.log("This is my response ",res);
+
+  if(res.status==200)
+  {
+  setSuccess("Signed up Successfully");
+    reset();
+     router.push('/signin');
+  }
+
     }
-
-    console.log("Form Data:", formData);
-
-    router.push("/create_company");
+    catch(err){
+     console.log("This is your error ",err);
+     
+if(err.status==409)
+{
+  setError("This email is already Exists!!");
+}
+else{
+      setError("Signup FAiled");
+}
+    }
+    finally{
+      setLoading(false);
+    }
   };
-
+  
+  
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg,#0f172a,#1e293b)",
-        display: "flex",
-        alignItems: "center",
+    <>
+
+    
+
+
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      style={{
+        maxWidth: "600px",
+        margin: "8rem auto",
+        padding: "2rem",
+        border: "1px solid #ccc",
+        borderRadius: "8px",
       }}
     >
-      <Container maxWidth="sm">
-        <Paper
-          elevation={0}
-          sx={{
-            p: 5,
-            borderRadius: "20px",
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#fff",
-          }}
-        >
-          <Stack spacing={3}>
 
-            {/* Title */}
-            <Box textAlign="center">
-              <Typography variant="h4" fontWeight="bold">
-                Create Account 🚀
-              </Typography>
-              <Typography sx={{ color: "#94a3b8", mt: 1 }}>
-                Start your journey with ProLedger ERP
-              </Typography>
-            </Box>
+      {success && <Alert severity="success">{success}</Alert>}
 
-            {/* Form */}
-            <Box component="form" onSubmit={handleSubmit}>
+     {error && <Alert severity="error">{error}</Alert>}
 
-              <TextField
-                label="Full Name"
-                name="fullName"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.fullName}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyle}
-              />
+      <Typography variant="h5" gutterBottom>
+        Sign Up
+      </Typography>
 
-              <TextField
-                label="Work Email"
-                name="email"
-                type="email"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.email}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyle}
-              />
+      {/* Full Name */}
+      <Controller
+        name="fullName"
+        control={control}
+        rules={{ required: "Full Name is required" }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Full Name"
+            fullWidth
+            margin="normal"
+            error={!!errors.fullName}
+            helperText={errors.fullName?.message}
+          />
+        )}
+      />
 
-              <TextField
-                label="Mobile Number"
-                name="mobile"
-                type="tel"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.mobile}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PhoneIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyle}
-              />
+      {/* Email */}
+      <Controller
+        name="email"
+        control={control}
+        rules={{
+          required: "Email is required",
+          pattern: {
+            value: /^\S+@\S+\.\S+$/,
+            message: "Invalid email format",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Email Address"
+            fullWidth
+            margin="normal"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
+        )}
+      />
 
-              <TextField
-                label="Password"
-                name="password"
-                type="password"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.password}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyle}
-              />
+       <Controller
+        name="phoneNumber"
+        control={control}
+        rules={{
+          required: "Phone Number is required",
+        
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Phone Number"
+            fullWidth
+            margin="normal"
+            error={!!errors.phoneNumber}
+            helperText={errors.phoneNumber?.message}
+          />
+        )}
+      />
 
-              <TextField
-                label="Confirm Password"
-                name="confirmPassword"
-                type="password"
-                fullWidth
-                required
-                margin="normal"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon sx={{ color: "#94a3b8" }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={inputStyle}
-              />
+      {/* Password */}
+      <Controller
+        name="password"
+        control={control}
+        rules={{
+          required: "Password is required",
+          minLength: {
+            value: 6,
+            message: "Password must be at least 6 characters",
+          },
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
+        )}
+      />
 
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 3,
-                  py: 1.5,
-                  borderRadius: "12px",
-                  fontWeight: "bold",
-                  background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                }}
-              >
-                Sign Up
-              </Button>
+      {/* Confirm Password */}
+      <Controller
+        name="confirmPassword"
+        control={control}
+        rules={{
+          required: "Confirm your password",
+          validate: (value) =>
+            value === passwordValue || "Passwords do not match",
+        }}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Confirm Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
+          />
+        )}
+      />
 
-              <Box textAlign="center" mt={2}>
-                <Typography sx={{ color: "#94a3b8" }}>
-                  Already have an account?{" "}
-                  <Link href="/signin" sx={{ color: "#6366f1" }}>
-                    Login
-                  </Link>
-                </Typography>
-              </Box>
+      {/* Terms & Conditions */}
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Controller
+              name="terms"
+              control={control}
+              rules={{ required: "You must accept the terms" }}
+              render={({ field }) => (
+                <Checkbox
+                  {...field}
+                  checked={field.value}
+                />
+              )}
+            />
+          }
+          label="I agree to the Terms & Conditions"
+        />
+        {errors.terms && (
+          <Typography color="error">
+            {errors.terms.message}
+          </Typography>
+        )}
+      </FormGroup>
 
-            </Box>
-          </Stack>
-        </Paper>
-      </Container>
-    </Box>
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        sx={{ mt: 2, backgroundColor: "#5d5877", color: "black" }}
+        disabled={loading}
+      >
+        {loading ? "Creating account..." : "CREATE ACCOUNT"}
+      </Button>
+    </form>
+    </>
   );
 }
-
-/* Common Input Style */
-const inputStyle = {
-  input: { color: "#fff" },
-  label: { color: "#94a3b8" },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: "#475569" },
-    "&:hover fieldset": { borderColor: "#6366f1" },
-  },
-};

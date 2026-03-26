@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Paper,
@@ -9,47 +9,121 @@ import {
   Button,
   Box
 } from "@mui/material";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
+import Alert from '@mui/material/Alert';
 
 export default function CompanyForm() {
 
-  const [formData, setFormData] = useState({
-    companyName: "",
-    businessType: "",
-    industry: "",
-    country: "",
-    state: "",
-    city: "",
-    currency: "",
-    timezone: "",
-    financialYearStart: "",
-    logo: null,
-    gstNumber: "",
-    panNumber: "",
-    address: "",
-    phone: "",
-    website: ""
+  const[recUserId, setRecUserId]= useState(""); 
+
+  const router = useRouter();
+
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    reset,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      companyName: "",
+      businessType: "",
+      industry: "",
+      country: "India",
+      state: "",
+      city: "",
+      logo: null,
+      gstNumber: "",
+      panNumber: "",
+      email: "",
+      address: "",
+      phone: "",
+      website: "",
+    }
   });
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
+  useEffect(() => {
+    const testToken = async () => {
+      try {
+        const resToken = localStorage.getItem("Token");
 
-    if (name === "logo") {
-      setFormData({
-        ...formData,
-        logo: files[0]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+        if (!resToken) {
+          router.push("/signin");
+        }
+
+        const res = await axios.post("/api/jwt_verify", { resToken });
+
+        console.log("This is your responce with id", res.data.received_id);
+
+        setRecUserId(res.data.received_id);
+
+        if (!res.data.valid) {
+           console.log("Valid Token",res.data.valid);
+          router.push("/signin");
+         
+        }
+        
+      } catch (err) {
+        console.log("error", err);
+      }
+    };
+
+    testToken();
+  }, []);
+
+   const [loading, setLoading] = useState(false);
+  
+    const [success, setSuccess]= useState("");
+  
+    const [error, setError] = useState("");
+  
+    
+
+  const onSubmit = async (data) => {
+
+    setLoading(true);
+
+     try{
+      setSuccess('');
+      setError('');
+
+      data.userId=recUserId;
+
+      console.log("payload is ", data);
+    
+    const rest = await axios.post("/api/create_company_api", data);
+    console.log("This is my responce",rest);
+
+      if(rest.status==200)
+  {
+  setSuccess("company created Successfully");
+   reset();
+     router.push('/dashboard');
+  }
+
     }
-  };
+    catch(err){
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Full Company Data:", formData);
-  };
+        console.log("This is your error ",err.response);
+
+
+      if(err.status==409){
+       setError(err.response.data.message);
+
+       if(err.response.data.message=="Company already exists for this user")
+       {
+        router.push("/dashboard");
+       }
+      }
+   
+    }
+    finally{
+      setLoading(false);
+    }
+  }
+  
 
   const businessTypes = [
     "Manufacturer",
@@ -70,6 +144,17 @@ export default function CompanyForm() {
     "Healthcare",
     "Education",
     "Other"
+  ];
+
+  const statesOfIndia = [
+    "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+    "Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand",
+    "Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur",
+    "Meghalaya","Mizoram","Nagaland","Odisha","Punjab",
+    "Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura",
+    "Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands",
+    "Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi",
+    "Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"
   ];
 
   return (
@@ -93,42 +178,144 @@ export default function CompanyForm() {
           }}
         >
 
+            {success && <Alert severity="success">{success}</Alert>}
+          
+               {error && <Alert severity="error">{error}</Alert>}
+          
           <Typography variant="h4" gutterBottom fontWeight="bold">
             Company Setup
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)}>
 
             {/* ---------- Basic Info ---------- */}
             <Typography variant="h6" sx={{ mt: 2, color: "#cbd5f5" }}>
               Basic Company Info
             </Typography>
 
-            <TextField label="Company Name" name="companyName" fullWidth required margin="normal" value={formData.companyName} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="companyName"
+              control={control}
+              rules={{ required: "Company Name is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company Name"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.companyName}
+                  helperText={errors.companyName?.message}
+                />
+              )}
+            />
 
-            <TextField select label="Business Type" name="businessType" fullWidth required margin="normal" value={formData.businessType} onChange={handleChange} sx={inputStyle}>
-              {businessTypes.map((type) => (
-                <MenuItem key={type} value={type}>{type}</MenuItem>
-              ))}
-            </TextField>
+            <Controller
+              name="businessType"
+              control={control}
+              rules={{ required: "Business Type is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Business Type"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.businessType}
+                  helperText={errors.businessType?.message}
+                >
+                  {businessTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
 
-            <TextField select label="Industry" name="industry" fullWidth required margin="normal" value={formData.industry} onChange={handleChange} sx={inputStyle}>
-              {industries.map((ind) => (
-                <MenuItem key={ind} value={ind}>{ind}</MenuItem>
-              ))}
-            </TextField>
+            <Controller
+              name="industry"
+              control={control}
+              rules={{ required: "Industry is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Industry"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.industry}
+                  helperText={errors.industry?.message}
+                >
+                  {industries.map((ind) => (
+                    <MenuItem key={ind} value={ind}>
+                      {ind}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
 
-            <TextField label="Country" name="country" fullWidth required margin="normal" value={formData.country} onChange={handleChange} sx={inputStyle} />
+            <Controller
+  name="country"
+  control={control}
+  defaultValue="India" // <-- Set default value here
+  render={({ field }) => (
+    <TextField
+      {...field}
+      label="Country"
+      fullWidth
+      margin="normal"
+      sx={inputStyle}
+      InputProps={{
+        readOnly: true, // field is read-only
+      }}
+    />
+  )}
+/>
 
-            <TextField label="State" name="state" fullWidth required margin="normal" value={formData.state} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="state"
+              control={control}
+              rules={{ required: "State is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="State"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.state}
+                  helperText={errors.state?.message}
+                >
+                  {statesOfIndia.map((state) => (
+                    <MenuItem key={state} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
 
-            <TextField label="City" name="city" fullWidth required margin="normal" value={formData.city} onChange={handleChange} sx={inputStyle} />
-
-            <TextField label="Currency" name="currency" fullWidth required margin="normal" value={formData.currency} onChange={handleChange} sx={inputStyle} />
-
-            <TextField label="Time Zone" name="timezone" fullWidth required margin="normal" value={formData.timezone} onChange={handleChange} sx={inputStyle} />
-
-            <TextField type="date" label="Financial Year Start" name="financialYearStart" fullWidth margin="normal" InputLabelProps={{ shrink: true }} value={formData.financialYearStart} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="city"
+              control={control}
+              rules={{ required: "City is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="City"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.city}
+                  helperText={errors.city?.message}
+                />
+              )}
+            />
 
             {/* ---------- Company Details ---------- */}
             <Typography variant="h6" sx={{ mt: 4, color: "#cbd5f5" }}>
@@ -147,18 +334,105 @@ export default function CompanyForm() {
               }}
             >
               Upload Company Logo
-              <input type="file" hidden name="logo" accept="image/*" onChange={handleChange} />
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={(e) => setValue("logo", e.target.files[0])}
+              />
             </Button>
 
-            <TextField label="GST Number" name="gstNumber" fullWidth margin="normal" value={formData.gstNumber} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="gstNumber"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company GST Number"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                />
+              )}
+            />
 
-            <TextField label="PAN Number" name="panNumber" fullWidth margin="normal" value={formData.panNumber} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="panNumber"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company PAN Number"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                />
+              )}
+            />
 
-            <TextField label="Company Address" name="address" fullWidth multiline rows={3} margin="normal" value={formData.address} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="address"
+              control={control}
+              rules={{ required: "Address is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company Address"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.address}
+                  helperText={errors.address?.message}
+                />
+              )}
+            />
 
-            <TextField label="Phone" name="phone" fullWidth margin="normal" value={formData.phone} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company Email"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                />
+              )}
+            />
 
-            <TextField label="Website" name="website" fullWidth margin="normal" value={formData.website} onChange={handleChange} sx={inputStyle} />
+            <Controller
+              name="phone"
+              control={control}
+              rules={{ required: "Phone is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company Phone"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                />
+              )}
+            />
+
+            <Controller
+              name="website"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Company Website"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                />
+              )}
+            />
 
             <Button
               type="submit"
@@ -169,7 +443,7 @@ export default function CompanyForm() {
                 py: 1.5,
                 borderRadius: "12px",
                 fontWeight: "bold",
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+                background: "linear-gradient(135deg,#6366f1,#8b5cf6)"
               }}
             >
               Save & Continue
@@ -182,13 +456,14 @@ export default function CompanyForm() {
   );
 }
 
-/* 🔥 Modern Input Styling */
 const inputStyle = {
-  input: { color: "#fff" },
-  label: { color: "#94a3b8" },
+  "& .MuiInputBase-input": { color: "#fff" },
+  "& .MuiSelect-select": { color: "#fff" },
+  "& .MuiInputLabel-root": { color: "#94a3b8" },
   "& .MuiOutlinedInput-root": {
     "& fieldset": { borderColor: "#475569" },
     "&:hover fieldset": { borderColor: "#6366f1" },
     "&.Mui-focused fieldset": { borderColor: "#8b5cf6" }
-  }
+  },
+  "& .MuiSvgIcon-root": { color: "#fff" }
 };

@@ -14,9 +14,15 @@
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
     "@mui/x-charts": "^8.27.5",
-    "next": "16.1.6",
+    "axios": "^1.13.6",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.3",
+    "next": "^16.2.0",
+    "pg": "^8.20.0",
+    "pool": "^0.4.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.2"
   },
   "devDependencies": {
     "eslint": "^9",

@@ -11,13 +11,16 @@ import {
   Stack
 } from "@mui/material";
 
+import axios from "axios";
+
 export default function AddVendorPage() {
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phonenumber: "",
     company: "",
+    gstnumber: "",
     city: "",
     state: "",
     country: "",
@@ -32,9 +35,18 @@ export default function AddVendorPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     console.log("Vendor Data:", formData);
+
+    const res =  await axios.post("/dashboard/vendor_api",formData);  
+    
+    console.log(res);
+
+    //console.log("Backend data:", res.data); 
+
+    
 
     // 👉 connect backend later
     alert("Vendor Added Successfully!");
@@ -92,12 +104,20 @@ export default function AddVendorPage() {
             />
 
             <TextField
-              label="Phone"
-              name="phone"
+              label="Phonenumber"
+              name="phonenumber"
               fullWidth
               required
-              value={formData.phone}
+              value={formData.phonenumber}
               onChange={handleChange}
+            />
+
+             <TextField
+             label="GST Number"
+             name="gstnumber"
+             fullWidth
+             value={formData.gstnumber}
+             onChange={handleChange}
             />
 
             <TextField

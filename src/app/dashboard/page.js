@@ -15,8 +15,87 @@ import {
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PeopleIcon from "@mui/icons-material/People";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
+import { useEffect, useState } from "react";
+import axios from 'axios';
+import { useRouter } from "next/navigation";
+
+
 
 export default function DashboardPage() {
+
+    const router = useRouter();
+
+    const[recUserId, setRecUserId]= useState(""); 
+
+  useEffect(() => {
+    const testToken = async () => {
+      try {
+        const resToken = localStorage.getItem("Token");
+
+        if (!resToken) {
+          router.push("/signin");
+        }
+
+        const res = await axios.post("/api/jwt_verify", { resToken });
+
+        console.log("This is your responce with id", res.data.received_id);
+
+        setRecUserId(res.data.received_id);
+
+        if (!res.data.valid) {
+           console.log("Valid Token",res.data.valid);
+          router.push("/signin");
+         
+        }
+        
+      } catch (err) {
+        console.log("error", err);
+      }
+    };
+
+    testToken();
+  }, []);
+
+
+  useEffect(() => {
+  const fetchDashboard = async () => {
+
+       try {
+console.log("this is my id ",recUserId);
+      const res = await axios.post("/api/dashboard_api", {
+        userId: recUserId,
+      });
+
+      console.log("company verify response :", res);
+
+      if(res.data?.valid){
+      
+      }else{
+        router.push("/create_company");
+      }
+
+    }
+
+    catch (error) {
+      console.error(error);
+       router.push("/create_company");
+    }
+  }
+  if(recUserId){
+
+    console.log("this is me inside");
+  fetchDashboard();
+  }
+}, [recUserId]);
+
+
+
+
+  
+
+
+
+
 
   const stats = [
     {

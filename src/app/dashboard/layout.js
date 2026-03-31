@@ -13,6 +13,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import StoreIcon from "@mui/icons-material/Store";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -29,6 +30,7 @@ export default function DashboardLayout({ children }) {
     { name: "Company", icon: <BusinessIcon />, path: "/dashboard/company" },
     { name: "Customers", icon: <PeopleIcon />, path: "/dashboard/customers" },
     { name: "Vendors", icon: <StoreIcon />, path: "/dashboard/vendors" },
+    { name: "Items", icon: <InventoryIcon />, path: "/dashboard/create_item" },
     { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard" },
     { name: "Reports", icon: <BarChartIcon />, path: "/dashboard" },
     { name: "Logout", icon: <LogoutIcon />, path: "/dashboard/logout" },

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import Alert from "@mui/material/Alert";
 import {
   Box,
   Typography,
@@ -8,169 +9,240 @@ import {
   TextField,
   Button,
   MenuItem,
-  Stack
+  CircularProgress
 } from "@mui/material";
-import axios from "axios";  
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
 
-export default function AddCustomerPage() {
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phonenumber: "",
-    city: "",
-    state: "",
-    gstnumber: "",
-    country: "",
-    status: "Active",
-    address: "",
+export default function CustomerForm() {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      customerName: "",
+      email: "",
+      phone: "",
+      gstNumber: "",
+      city: "",
+      status: "Active",
+      address: "",
+    },
   });
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      setSuccess("");
+      setError("");
+
+      console.log("DATA:", data);
+
+      await axios.post("/api/customers_api", data);
+
+      setSuccess("Customer added successfully ");
+
+      reset();
+
+    } catch (err) {
+      console.log(err);
+
+      if (err.response?.status === 409) {
+        setError(err.response.data.message);
+      }
+
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-     console.log("Customer Data:", formData);
-
-    const res =  await axios.post("/dashboard/api",formData);   
-
-    console.log("Backend data:", res.data); 
-
-   
-    alert("Customer Added Successfully!");
-  };
-
-  
 
   return (
-    <Box
-      sx={{
-        maxWidth: "900px",   
-        mx: "auto",          
-      }}
-    >
+    <Box>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        style={{
+          maxWidth: "600px",
+          margin: "3rem auto",
+        }}
+      >
+        <Paper sx={{ p: 3, borderRadius: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Add Customer
+          </Typography>
 
-      {/* HEADER */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={600}>
-          Add Customer
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Fill the details to create a new customer
-        </Typography>
-      </Box>
+          {success && <Alert severity="success">{success}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
 
-      {/* FORM */}
-      <Paper sx={{ p: 4, borderRadius: 3 }}>
-        <form onSubmit={handleSubmit}>
+          {/* Vendor Name */}
+          <Controller
+            name="customerName"
+            control={control}
+            rules={{ required: "Customer Name is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Customer Name"
+                fullWidth
+                margin="normal"
+                error={!!errors.customerName}
+                helperText={errors.customerName?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-          {/* STACK = single column */}
-          <Stack spacing={3}>
+          {/* Email */}
+          <Controller
+            name="email"
+            control={control}
+            rules={{
+              required: "Email is required",
+              pattern: {
+                value: /^\S+@\S+\.\S+$/,
+                message: "Invalid email",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                fullWidth
+                margin="normal"
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-            <TextField
-              label="Full Name"
-              name="name"
-              fullWidth
-              required
-              value={formData.name}
-              onChange={handleChange}
-            />
+          {/* Phone */}
+          <Controller
+            name="phone"
+            control={control}
+            rules={{
+              required: "Phone is required",
+              minLength: {
+                value: 10,
+                message: "Enter valid 10 digit number",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Phone Number"
+                fullWidth
+                margin="normal"
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-            <TextField
-              label="Email"
-              name="email"
-              type="email"
-              fullWidth
-              required
-              value={formData.email}
-              onChange={handleChange}
-            />
+          {/* GST Number */}
+          <Controller
+            name="gstNumber"
+            control={control}
+            rules={{
+              required: "GST Number is required",
+              minLength: {
+                value: 15,
+                message: "GST must be 15 characters",
+              },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="GST Number"
+                fullWidth
+                margin="normal"
+                error={!!errors.gstNumber}
+                helperText={errors.gstNumber?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-            <TextField
-              label="Phonenumber"
-              name="phonenumber"
-              fullWidth
-              required
-              value={formData.phonenumber}
-              onChange={handleChange}
-            />
+          {/* City */}
+          <Controller
+            name="city"
+            control={control}
+            rules={{ required: "City is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="City"
+                fullWidth
+                margin="normal"
+                error={!!errors.city}
+                helperText={errors.city?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-            <TextField
-              label="City"
-              name="city"
-              fullWidth
-              value={formData.city}
-              onChange={handleChange}
-            />
+          {/* Status */}
+          <Controller
+            name="status"
+            control={control}
+            rules={{ required: "Status is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                label="Status"
+                fullWidth
+                margin="normal"
+                error={!!errors.status}
+                helperText={errors.status?.message}
+                disabled={loading}
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Inactive">Inactive</MenuItem>
+              </TextField>
+            )}
+          />
 
-            <TextField
-              label="State"
-              name="state"
-              fullWidth
-              value={formData.state}
-              onChange={handleChange}
-            />
+          {/* Address */}
+          <Controller
+            name="address"
+            control={control}
+            rules={{ required: "Address is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Address"
+                multiline
+                rows={3}
+                fullWidth
+                margin="normal"
+                error={!!errors.address}
+                helperText={errors.address?.message}
+                disabled={loading}
+              />
+            )}
+          />
 
-           <TextField
-             label="GST Number"
-             name="gstnumber"
-             fullWidth
-             value={formData.gstnumber}
-             onChange={handleChange}
-            />
+          {/* Submit */}
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+            disabled={loading}
+          >
 
-            <TextField
-              label="Country"
-              name="country"
-              fullWidth
-              value={formData.country}
-              onChange={handleChange}
-            />
-
-            <TextField
-              select
-              label="Status"
-              name="status"
-              fullWidth
-              value={formData.status}
-              onChange={handleChange}
-            >
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Inactive">Inactive</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Address"
-              name="address"
-              multiline
-              rows={4}
-              fullWidth
-              value={formData.address}
-              onChange={handleChange}
-            />
-
-            {/* BUTTONS */}
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
-              <Button variant="outlined">
-                Cancel
-              </Button>
-
-              <Button type="submit" variant="contained">
-                Save Customer
-              </Button>
-            </Box>
-
-          </Stack>
-
-        </form>
-      </Paper>
-
+            
+            {loading ? <CircularProgress size={24} /> : "Add Customer"}
+          </Button>
+        </Paper>
+      </form>
     </Box>
   );
 }

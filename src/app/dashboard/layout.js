@@ -31,7 +31,7 @@ export default function DashboardLayout({ children }) {
     { name: "Customers", icon: <PeopleIcon />, path: "/dashboard/customers" },
     { name: "Vendors", icon: <StoreIcon />, path: "/dashboard/vendors" },
     { name: "Items", icon: <InventoryIcon />, path: "/dashboard/create_item" },
-    { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard" },
+    { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard/create_invoice" },
     { name: "Reports", icon: <BarChartIcon />, path: "/dashboard" },
     { name: "Logout", icon: <LogoutIcon />, path: "/dashboard/logout" },
   ];

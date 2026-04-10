@@ -102,12 +102,6 @@ finally{
 }
 
 
-
-
-  
-
-
-
   // const vendors = [
   //   { id: 1, name: "Tech Supplies", email: "tech@gmail.com", phone: "9876500000", city: "Delhi", status: "Active" },
   //   { id: 2, name: "Office Mart", email: "office@gmail.com", phone: "9123400000", city: "Mumbai", status: "Active" },

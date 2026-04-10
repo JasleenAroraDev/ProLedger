@@ -10,15 +10,13 @@ const pool = new Pool({
 
 })
 
-
-
 export async function POST(req){
 
     const rest= await req.json();
 
     console.log("REST",rest);
 
-    const{invoiceNumber,date,invoiceType,partyId,partyName,grossTotal,discount,gstType,cgst,sgst,igst,cgstAmount,sgstAmount,igstAmount,netTotal,products} = rest.finalData;
+    const{invoiceNumber,date,invoiceType,partyId,partyName,gstNumber,panNumber,grossTotal,discount,gstType,cgst,sgst,igst,cgstAmount,sgstAmount,igstAmount,netTotal,products} = rest.finalData;
 
    
 
@@ -28,11 +26,22 @@ export async function POST(req){
 
         await client.query("Begin");
 
-        const my_query= 'insert into invoice (invoice_no,invoice_date,invoice_type,party_id,party_name,gross_total,discount,gst_type,cgst_pers,cgst_amt,sgst_pers,sgst_amt,igst_pers,igst_amt,net_total) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) returning id';
+        const my_invoice= 'select * from invoice where invoice_no= $1';
+          
+        const invoice_value=[invoiceNumber];
+          
+        const qry_invoice = await pool.query(my_invoice,invoice_value);
+          
+          if(qry_invoice.rowCount>0)
+            {
+             return NextResponse.json({message:"This Invoive Number is already exist", status:409});
+            }
+      
+        const my_query= 'insert into invoice (invoice_no,invoice_date,invoice_type,party_id,party_name,gross_total,discount,gst_type,cgst_pers,cgst_amt,sgst_pers,sgst_amt,igst_pers,igst_amt,net_total,gst_no,pan_no) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) returning id';
 
-        const value= [invoiceNumber,date,invoiceType,partyId,partyName,grossTotal,discount,gstType,cgst,cgstAmount,sgst,sgstAmount,igst,igstAmount,netTotal];
+        const value= [invoiceNumber,date,invoiceType,partyId,partyName,grossTotal,discount,gstType,cgst,cgstAmount,sgst,sgstAmount,igst,igstAmount,netTotal,gstNumber,panNumber];
 
-        console.log("My all the values are ",invoiceNumber,date,invoiceType,partyId,partyName,grossTotal,discount,gstType,cgst,cgstAmount,sgst,sgstAmount,igst,igstAmount,netTotal);
+        console.log("My all the values are ",invoiceNumber,date,invoiceType,partyId,partyName,grossTotal,discount,gstType,cgst,cgstAmount,sgst,sgstAmount,igst,igstAmount,netTotal,gstNumber,panNumber);
 
         const result= await client.query(my_query,value);
 
@@ -41,7 +50,7 @@ export async function POST(req){
 
 
 
-for(const pro_info of products){
+for(const pro_info of products){ 
 
           const my_qry = 'insert into invoice_items (invoice_id,item_id,item_name,item_qty,item_price,final_amt) values($1,$2,$3,$4,$5,$6)';
      const value2= [returned_id,pro_info.productId,pro_info.name,pro_info.qty,pro_info.price,pro_info.amount];

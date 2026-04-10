@@ -1,524 +1,224 @@
 "use client";
-import React, { useEffect, useMemo,useState } from "react";
-import Alert from '@mui/material/Alert';
+import React, { useState, useEffect, use } from "react";
 import {
   Box,
   Typography,
   Paper,
-  Grid,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
   TextField,
+  InputAdornment,
   Button,
-  MenuItem,
-  IconButton,
-  Divider,
-  CircularProgress,
+  CircularProgress
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import Autocomplete from "@mui/material/Autocomplete";
-import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
+
+import SearchIcon from "@mui/icons-material/Search";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+import { useRouter } from "next/navigation";
 import axios from "axios";
+import Alert from "@mui/material/Alert";
 
-// const productOptions = [
-//   { label: "Product A" },
-//   { label: "Product B" },
-//   { label: "Product C" },
-// ];
+export default function InvoiceListPage() {
 
-// const partyOptions = [
-//   { label: "ABC Traders" },
-//   { label: "XYZ Pvt Ltd" },
-//   { label: "Guru Nanak Store" },
-// ];
 
-export default function InvoicePage() {
 
-const [partyOptions, setPartyOptions]=useState([]);
-const [productOptions, setProductOptions]= useState([]);
-
-const [grossTotalAmt, setGrossTotalAmt]=useState(0);
-
-  const [success, setSuccess]= useState("");
-
+  const [invoices, setInvoices] = useState([]);
+  const [search, setSearch] = useState("");
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-
-
-
-const [loading, setLoading]=useState(false);
-
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      invoiceNumber: "",
-      date: "",
-      invoiceType: "",
-    partyId: "",
-partyName: "",
-grossTotal:0,
-      discount: 0,
-      gstType: "none",
-      cgst: 0,
-      sgst: 0,
-      igst: 0,
-        cgstAmount: 0,
-  sgstAmount: 0,
-  igstAmount: 0,
-     products: [{ productId: "", name: "", qty: "", price: "", amount: 0 }]
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "products",
-  });
-
-  const products = useWatch({ control, name: "products" });
-  const discount = watch("discount");
-  const gstType = watch("gstType");
-  const cgst = watch("cgst");
-  const sgst = watch("sgst");
-  const igst = watch("igst");
-
-  // Calculate Amount per row
-
-  // Gross Total
-  const grossTotal = useMemo(() => {
-
-
-    const gotValue= products.reduce((sum, item) => sum + (item.amount || 0), 0);
-  setGrossTotalAmt(gotValue);
-  return gotValue;
-
-  }, [products]);
-
-
-const { netTotal, cgstAmount, sgstAmount, igstAmount } = useMemo(() => {
-  let total = grossTotal - (parseFloat(discount) || 0);
-
-  let cgstAmt = 0;
-  let sgstAmt = 0;
-  let igstAmt = 0;
-
-  if (gstType === "cgst_sgst") {
-    cgstAmt = total * ((parseFloat(cgst) || 0) / 100);
-    sgstAmt = total * ((parseFloat(sgst) || 0) / 100);
-    total += cgstAmt + sgstAmt;
-  } 
-  else if (gstType === "igst") {
-    igstAmt = total * ((parseFloat(igst) || 0) / 100);
-    total += igstAmt;
-  }
-
-  return {
-    netTotal: total,
-    cgstAmount: cgstAmt,
-    sgstAmount: sgstAmt,
-    igstAmount: igstAmt,
-  };
-}, [grossTotal, discount, gstType, cgst, sgst, igst]);
-
-
-  const onSubmit = async (data) => {
-    const finalData = {
-    ...data,
-    cgstAmount,
-    sgstAmount,
-    igstAmount,
-    netTotal,
-    grossTotal : grossTotalAmt,
-  };
-
-
-    console.log("Final Invoice:", finalData);
-
-try{
-   setSuccess('');
-   setError('');
+  const [loading, setLoading] = useState(false);
+   const [deleteLoading, setDeleteLoading] = useState(false);
 
     
-
-    const res= await axios.post("/api/invoice_api",{finalData});
-    console.log("This is my res",res);
-
-    if(res.status==200){
-      setSuccess("Invoice Data Saved Successfully");
-      reset();
-
-    }
-}
-
-catch(err){
-  setError("Something Went Wrong");
-
-}
-    
-  };
-
-  const target= async (abc) =>{
-
-    try{
-     setLoading(true);
-    console.log("This is my target", abc);
-
-    const res= await axios.post("/api/fetch_party_api", {abc});
-
-    console.log("This is my result",res.data);
-    setPartyOptions(res.data.data);
-
-  }
-  catch(err){
-    console.log("This is Frontend error",err);
-  }
-
-  finally{
-   setLoading(false);
-  }
-
-
-  }
-
-  useEffect(()=>{
-    const fetchItems= async ()=>{
-
-      try{
-       const res =await axios.post("/api/fetch_item_api");
-        console.log("This is my res",res.data);
-        setProductOptions(res.data.data);
-      }
-      catch(err){
-        console.log("this is my error ",err);
-
-      }
-
-    }
-    fetchItems();
-  }, []);
-
-  return (
-    
-    
-    <Box p={3}>
-      <Paper sx={{ p: 4, borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight="bold" mb={3}>
-          Invoice
-        </Typography>
-
-           {success && <Alert severity="success">{success}</Alert>}
-        
-             {error && <Alert severity="error">{error}</Alert>}
-        
-
-        {/* Header Section */}
-        <Grid container spacing={2}>
-        <Grid size={4}>
-            <Controller
-              name="invoiceNumber"
-              control={control}
-              rules={{ required: "Required" }}
-              render={({ field }) => (
-                <TextField {...field} label="Invoice Number" fullWidth error={!!errors.invoiceNumber} />
-              )}
-            />
- </Grid>
-  <Grid size={4}>
-            <Controller
-              name="date"
-              control={control}
-              rules={{ required: "Required" }}
-              render={({ field }) => (
-                <TextField {...field} type="date" fullWidth InputLabelProps={{ shrink: true }} />
-              )}
-            />
- </Grid>
-    <Grid size={4}>
-            <Controller
-              name="invoiceType"
-              control={control}
-              rules={{ required: "Required" }}
-              render={({ field }) => (
-                <TextField {...field} select label="Invoice Type" fullWidth onChange={(e) => {
-                  field.onChange(e.target.value)
-                    target(e.target.value) }
-                }
-                >
-                  <MenuItem value="purchase">Puchase
-                  </MenuItem>
-                  <MenuItem value="sale">Sale</MenuItem>
-                </TextField>
-              )}
-        
-            />
- </Grid>
-
-
-{loading? <CircularProgress/> :
- 
-
-     <Grid size={8}>
-<Controller
-  name="partyId"
-  control={control}
-  rules={{ required: "Required" }}
-  render={({ field }) => (
-    <Autocomplete
-      options={partyOptions}
-      getOptionLabel={(option) => option.label || ""}
-      value={
-        partyOptions.find((opt) => opt.id === field.value) || null
-      }
-      onChange={(_, data) => {
-        field.onChange(data ? data.id : "");
-        setValue("partyName", data ? data.label : "");
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Party Name"
-          error={!!errors.partyId}
-        />
-      )}
-    />
-  )}
-/>
-
-</Grid>
-}
-        </Grid>
-
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Products Section */}
-        <Typography variant="h6" mb={2}>
-          Products
-        </Typography>
-
-        {fields.map((item, index) => (
-          <Grid container spacing={2} key={item.id} alignItems="center" mb={1}>
-           <Grid size={4}>
-<Controller
-  name={`products.${index}.productId`}
-  control={control}
-  rules={{ required: true }}
-  render={({ field }) => (
-    <Autocomplete
-      options={productOptions}
-      getOptionLabel={(opt) => opt.label || ""}
-      onChange={(_, data) => {
-        field.onChange(data ? data.id : "");
-        setValue(`products.${index}.name`, data ? data.label : "");
-      }}
-      renderInput={(params) => (
-        <TextField {...params} label="Product" />
-      )}
-    />
-  )}
-/>
-            </Grid>
-
-        <Grid size={2}>
-<Controller
-  name={`products.${index}.qty`}
-  control={control}
-  rules={{ required: true }}
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Qty"
-      type="number"
-      fullWidth
-      onChange={(e) => {
-        const value = e.target.value;
-        field.onChange(value);
-
-        const price = watch(`products.${index}.price`) || 0;
-        setValue(`products.${index}.amount`, value * price);
-      }}
-    />
-  )}
-/>
-            </Grid>
-
-      
-        <Grid size={2}>
-<Controller
-  name={`products.${index}.price`}
-  control={control}
-  rules={{ required: true }}
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Price"
-      type="number"
-      fullWidth
-      onChange={(e) => {
-        const value = e.target.value;
-        field.onChange(value);
-
-        const qty = watch(`products.${index}.qty`) || 0;
-        setValue(`products.${index}.amount`, value * qty);
-      }}
-    />
-  )}
-/>
-            </Grid>
-
-           
-        <Grid size={2}>
-              <Controller
-                name={`products.${index}.amount`}
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Amount" fullWidth InputProps={{ readOnly: true }} />
-                )}
-              />
-            </Grid>
-
-       
-        <Grid size={1}>
-              <IconButton color="error" onClick={() => remove(index)}>
-                <DeleteIcon />
-              </IconButton>
-            </Grid>
-          </Grid>
-        ))}
-
-        <Button
-          startIcon={<AddIcon />}
-          onClick={() => append({ name: null, qty: "", price: "", amount: 0 })}
-        >
-          Add Row
-        </Button>
-
-        <Divider sx={{ my: 3 }} />
-
-        {/* Totals Section */}
-        <Grid container spacing={2}>
-       
-     
-        <Grid size={4}>
-            <TextField label="Gross Total" name="grossTotal" value={grossTotal} fullWidth InputProps={{ readOnly: true }} />
-          </Grid>
-
-        
-     
-        <Grid size={4}>
-            <Controller
-              name="discount"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} label="Discount" type="number" fullWidth />
-              )}
-            />
-          </Grid>
-
-
    
-        <Grid size={4}>
-            <Controller
-              name="gstType"
-              control={control}
-              render={({ field }) => (
-                <TextField {...field} select label="GST Type" fullWidth>
-                  <MenuItem value="none">None</MenuItem>
-                  <MenuItem value="cgst_sgst">CGST & SGST</MenuItem>
-                  <MenuItem value="igst">IGST</MenuItem>
-                </TextField>
-              )}
-            />
-         
-</Grid>
-          {gstType === "cgst_sgst" && (
-            <>
+  const router = useRouter();
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/view_invoice_api", { search });
+      setInvoices(res.data.data);
+      console.log("This is res",res.data.data);
+    } catch (err) {
+      setError("Error fetching invoices");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+
+  fetchInvoices();
 
 
+}, [search]);
 
-        <Grid size={4}>
-                <Controller
-                  name="cgst"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label="CGST %" type="number" fullWidth/>
-                  )}
-                />
-              </Grid>
-           
+const onDelete = async(id)=>{
 
-    <Grid size={4}>
-      <TextField label="CGST Amount" value={cgstAmount} InputProps={{ readOnly: true }} fullWidth />
-    </Grid>
+  try{
+    setDeleteLoading(true);
+      setSuccess("");
+      setError("");
 
-
-
-
- 
-        <Grid size={2}>
-                <Controller
-                  name="sgst"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField {...field} label="SGST %" type="number" fullWidth />
-                  )}
-                />
-              </Grid>
-
-                      <Grid size={2}>
-      <TextField label="SGST Amount" value={sgstAmount} fullWidth InputProps={{ readOnly: true }} />
-    </Grid>
-
+  console.log("This is id",id);
   
 
-            </>
-          )}
+  const res= await axios.post("/api/invoice_delete_api",{id});
 
-          {gstType === "igst" && (
-           
-        <Grid size={2}>
-              <Controller
-                name="igst"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="IGST %" type="number" fullWidth />
-                )}
-              />
-            </Grid>
-          )}
+  console.log("This is my result",res);
 
+  if(res){
+      setSuccess("Invoice Delete Successfully ");
 
-{gstType === "igst" && (
+  }
+  fetchInvoices();
+} catch(err){
+  setError("Something Went wrong");
 
-        <Grid size={2}>
-    <TextField label="IGST Amount" value={igstAmount} fullWidth InputProps={{ readOnly: true }} />
-  </Grid>
-)}
+}
+finally{
+  setDeleteLoading(false);
+}
 
+          {success && <Alert severity="success">{success}</Alert>}
+          {error && <Alert severity="error">{error}</Alert>}
 
-     
-        <Grid size={2}>
-            <TextField label="Net Total" value={netTotal} fullWidth InputProps={{ readOnly: true }} />
-          </Grid>
-        </Grid>
+}
 
-        
+const createPdf= (abc)=>{
+  console.log("abc value is:", abc); 
 
-        <Box mt={4}>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleSubmit(onSubmit)}
-            disabled={!products.some((p) => p.qty && p.price)}
-          >
-            Submit Invoice
-          </Button>
-        </Box>
+ router.push(`/dashboard/create_invoice/invoice_pdf?id=${abc}`);
+
+}
+
+  
+ 
+
+  return (
+   
+    <Box>
+
+      {/* HEADER */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+        <Typography variant="h4">Invoices</Typography>
+
+        <Button
+          variant="contained"
+          onClick={() => router.push("/dashboard/create_invoice/add")}
+        >
+          + Add Invoice
+        </Button>
+      </Box>
+
+      {/* ALERTS */}
+      {success && <Alert severity="success">{success}</Alert>}
+      {error && <Alert severity="error">{error}</Alert>}
+
+      {/* SEARCH */}
+      <TextField
+        placeholder="Search invoice..."
+        fullWidth
+        sx={{ mb: 3 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {/* TABLE */}
+      <Paper sx={{ borderRadius: 3, overflowX: "auto" }}>
+
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Invoice No</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Party ID</TableCell>
+                <TableCell>Party Name</TableCell>
+                <TableCell>Gross Total</TableCell>
+                <TableCell>Discount</TableCell>
+                <TableCell>GST Type</TableCell>
+                <TableCell>CGST Perc</TableCell>
+                <TableCell>CGST Amt</TableCell>
+                <TableCell>SGST Perc</TableCell>
+                <TableCell>SGST Amt</TableCell>
+                <TableCell>IGST Perc</TableCell>
+                <TableCell>IGST Amt</TableCell>
+                <TableCell>Net Total</TableCell>
+                <TableCell>View</TableCell>
+                <TableCell>Delete</TableCell>
+                <TableCell>PDF</TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {invoices?.map((inv) => (
+                <TableRow key={inv.id} hover>
+
+                  <TableCell>{inv.invoice_no}</TableCell>
+                  <TableCell>{inv.invoice_date}</TableCell>
+                  <TableCell>{inv.invoice_type}</TableCell>
+                  <TableCell>{inv.party_id}</TableCell>
+                  <TableCell>{inv.party_name}</TableCell>
+                  <TableCell>{inv.gross_total}</TableCell>
+                  <TableCell>{inv.discount}</TableCell>
+                  <TableCell>{inv.gst_type}</TableCell>
+                  <TableCell>{inv.cgst_pers}</TableCell>
+                  <TableCell>{inv.cgst_amt}</TableCell>
+                  <TableCell>{inv.sgst_pers}</TableCell>
+                  <TableCell>{inv.sgst_amt}</TableCell>
+                  <TableCell>{inv.igst_pers}</TableCell>
+                  <TableCell>{inv.igst_amt}</TableCell>
+                  <TableCell>{inv.net_total}</TableCell>
+
+                  {/* VIEW */}
+                  <TableCell>
+                    <span
+                      style={{ cursor: "pointer", color: "blue" }}
+                      onClick={() =>
+                        router.push(`/dashboard/create_invoice/edit?id=${inv.id}`)
+                      }
+                    >
+                      <RemoveRedEyeIcon />
+                    </span>
+                  </TableCell>
+
+                  {/* DELETE */}
+                  <TableCell>
+                    <span onClick={() => onDelete(inv.id)} style={{ cursor: "pointer", color:"red" }}> {deleteLoading ? <CircularProgress /> : <DeleteIcon/>}</span>
+                  
+                  </TableCell>
+
+                  <TableCell>
+                    <span onClick={()=> createPdf(inv.id)}
+
+                     style={{ cursor: "pointer", color:"black" }}>PDF</span>
+                  </TableCell>
+
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+        )}
       </Paper>
     </Box>
   );
-
 }

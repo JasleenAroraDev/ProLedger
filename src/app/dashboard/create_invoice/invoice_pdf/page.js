@@ -5,12 +5,8 @@ import {
   Page,
   View,
   Text,
-  Image,
-  Link,
   StyleSheet,
-  Font,
   Canvas,
-  Note,
 } from "@react-pdf/renderer";
 
 import React, { useEffect,useState } from "react";
@@ -30,11 +26,12 @@ const styles = StyleSheet.create({
   // ── Header section ──────────────────────────────────────────────────────────
   headerView: {
     backgroundColor: "#1a237e",
-    padding: 16,
+    padding: 25,
     borderRadius: 6,
     marginBottom: 16,
     alignItems: "center",
-    height : "15%",
+    justifyContent: "center",
+
   },
   headerText: {
     color: "#ffffff",
@@ -58,11 +55,20 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 4,
   },
-  infoBlock: {
+  infoBlocks: {
     flexDirection: "column",
     flex: 1,
      marginBottom: 10,
+     width: "100%",        
+  alignItems: "center",
   },
+
+    infoBlock: {
+    flexDirection: "column",
+    flex: 1,
+     marginBottom: 10,
+    },
+
   infoLabel: {
     fontSize: 9,
     color: "#757575",
@@ -132,14 +138,21 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#212121",
   },
-  tableCellMuted: {
+  tableCellsMuted: {
     fontSize: 9,
     color: "#757575",
     marginTop: 2,
-     marginBottom: 10,
+    marginBottom: 10,
+    textAlign: "center",
   
 
   },
+
+   tableCellMuted: {
+    fontSize: 9,
+    color: "#757575",
+    marginTop: 2,
+    marginBottom: 10,},
  
   // ── Totals block ────────────────────────────────────────────────────────────
   totalsBlock: {
@@ -293,16 +306,16 @@ const MyDocument = () => {
       >
         <Page size="A4" style={styles.page}>
           <View style={styles.headerView}>
-            <Text style={styles.headerText}>ProLedger</Text>
+            <Text style={styles.headerText}>{process.env.NEXT_PUBLIC_COMP_NAME}</Text>
             <Text style={styles.subHeaderText}>
-              Smart Accounting for Modern Businesses
+              {process.env.NEXT_PUBLIC_TAGLINE}
             </Text>
-            <View style={styles.infoBlock}>
-              <Text style={styles.tableCellMuted}>
-                From: ProLedger Solutions, Chandigarh, India
+            <View style={styles.infoBlocks}>
+              <Text style={styles.tableCellsMuted}>
+                From: {process.env.NEXT_PUBLIC_COMP_ADDRESS}, {process.env.NEXT_PUBLIC_COMP_CITY} , {process.env.NEXT_PUBLIC_COMP_STATE}
               </Text>
-              <Text style={styles.tableCellMuted}>
-                (GSTIN: 04BBBPZ5678B2Z1)
+              <Text style={styles.tableCellsMuted}>
+                GSTIN: {process.env.NEXT_PUBLIC_COMP_GSTIN}
               </Text>
             </View>
           </View>
@@ -310,14 +323,14 @@ const MyDocument = () => {
           <View style={styles.infoRow}>
             <View style={styles.infoBlock}>
               <Text style={styles.infoLabel}>Invoice No</Text>
-              <Text style={styles.infoValue}>{inv?.invoice_no}</Text>
+              <Text style={styles.infoValue}>#{inv?.invoice_no}</Text>
             </View>
             <View style={styles.infoBlock}>
               <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoValue}>{inv?.invoice_date}</Text>
+              <Text style={styles.infoValue}> {inv?.invoice_date?.split("T")[0]}</Text>
             </View>
 
-            <View style={styles.infoBlock}>
+            {/* <View style={styles.infoBlock}>
               <Text style={styles.infoLabel}>Status</Text>
               <Text
                 style={[
@@ -327,7 +340,7 @@ const MyDocument = () => {
               >
                 UNPAID
               </Text>
-            </View>
+            </View> */}
           </View>
 
           <View style={[styles.infoRow, { marginBottom: 16 }]}>
@@ -449,27 +462,35 @@ const MyDocument = () => {
                 {inv?.discount}
               </Text>
             </View>
-
+             {inv?.cgst_pers > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>CGST(9%)</Text>
+              <Text style={styles.totalLabel}>CGST : {inv?.cgst_pers}%</Text>
               <Text style={styles.totalValue}>
                 {inv?.cgst_amt}
               </Text>
             </View>
 
+            )}
+
+           {inv?.sgst_pers > 0 && (
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>SGST (9%)</Text>
+              <Text style={styles.totalLabel}>SGST : {inv?.sgst_pers}%</Text>
               <Text style={styles.totalValue}>
                 {inv?.sgst_amt}
               </Text>
             </View>
+           )}
+
+           {inv?.igst_pers > 0 &&(
 
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>IGST (18%)</Text>
+              <Text style={styles.totalLabel}>IGST : {inv?.igst_pers}%</Text>
               <Text style={styles.totalValue}>
                 {inv?.igst_amt}
               </Text>
             </View>
+
+            )}
 
             <View style={styles.totalRowFinal}>
               <Text style={styles.totalLabelFinal}>
@@ -484,7 +505,7 @@ const MyDocument = () => {
           {/* ── Badge ── */}
           <View style={styles.badge}>
             <Text style={styles.badgeText}>
-              ✓ Digitally Verified — ProLedger
+              {process.env.NEXT_PUBLIC_VERIFIED}
             </Text>
           </View>
 
@@ -504,7 +525,7 @@ const MyDocument = () => {
 
           <View style={styles.footer} fixed>
             <Text style={styles.footerText}>
-              ProLedger Solutions — Chandigarh, India
+              {process.env.NEXT_PUBLIC_COMP_NAME} — {process.env.NEXT_PUBLIC_COMP_CITY} , {process.env.NEXT_PUBLIC_COMP_STATE}
             </Text>
 
             <Text

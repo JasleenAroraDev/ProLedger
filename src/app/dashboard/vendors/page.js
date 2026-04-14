@@ -26,7 +26,7 @@ import { useEffect } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 
 
@@ -195,7 +195,7 @@ finally{
                  <TableCell>
                   <span onClick={() => router.push(`/dashboard/vendors/edit?id=${vendor.id}`)}
                     style={{ cursor: "pointer", color: "blue" }}>
-                    View
+                   <RemoveRedEyeIcon/>
                 </span>
               </TableCell>
 

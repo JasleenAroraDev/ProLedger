@@ -57,7 +57,7 @@ export async function POST(req){
   console.log("secret", secret);
 
   const expireTime={
-    expiresIn:'1h'
+    expiresIn:'30d'
   }
 
   const token =  jwt.sign(payload,secret, expireTime);

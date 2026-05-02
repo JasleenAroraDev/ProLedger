@@ -12,7 +12,7 @@ export async function POST(req){
 
   const rest= await req.json();
 
-  const{customerName,email,phone , gstNumber, city, status,address}= rest;
+  const{customerName,email,phone , gstNumber, city, status,address,userId}= rest;
 
   try{
 
@@ -41,9 +41,9 @@ export async function POST(req){
     
 
 
-    const my_query = 'Insert into customers (customer_name,email,phone_number,gst_number,city,status,address) values($1,$2,$3,$4,$5,$6,$7)';
+    const my_query = 'Insert into customers (customer_name,email,phone_number,gst_number,city,status,address,user_id) values($1,$2,$3,$4,$5,$6,$7,$8)';
 
-    const value= [customerName,email,phone,gstNumber,city,status,address];
+    const value= [customerName,email,phone,gstNumber,city,status,address,userId];
 
     const res = await pool.query(my_query,value);
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -33,23 +33,12 @@ export default function InvoiceListPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
    const [deleteLoading, setDeleteLoading] = useState(false);
+   const [recUserId, setRecUserId]= useState("");
 
     
    
   const router = useRouter();
 
-  const fetchInvoices = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.post("/api/view_invoice_api", { search });
-      setInvoices(res.data.data);
-      console.log("This is res",res.data.data);
-    } catch (err) {
-      setError("Error fetching invoices");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
 
@@ -61,7 +50,7 @@ export default function InvoiceListPage() {
 const onDelete = async(id)=>{
 
   try{
-    setDeleteLoading(true);
+      setDeleteLoading(true);
       setSuccess("");
       setError("");
 
@@ -93,9 +82,34 @@ finally{
 const createPdf= (abc)=>{
   console.log("abc value is:", abc); 
 
- router.push(`/dashboard/create_invoice/invoice_pdf?id=${abc}`);
+ router.push(`/dashboard/invoices/invoice_pdf?id=${abc}`);
 
 }
+
+
+
+  const fetchInvoices = async () => {
+
+
+  try {
+    setLoading(true);
+
+    const res = await axios.post("/api/view_invoice_api", {
+      search,
+      user_id: recUserId,  
+    });
+
+    setInvoices(res.data.data || []);
+    console.log("This is res", res.data.data);
+
+  } catch (err) {
+    console.log(err);
+    setError("Error fetching invoices");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   
  
@@ -110,7 +124,7 @@ const createPdf= (abc)=>{
 
         <Button
           variant="contained"
-          onClick={() => router.push("/dashboard/create_invoice/add")}
+          onClick={() => router.push("/dashboard/invoices/add")}
         >
           + Add Invoice
         </Button>
@@ -173,7 +187,8 @@ const createPdf= (abc)=>{
                 <TableRow key={inv.id} hover>
 
                   <TableCell>{inv.invoice_no}</TableCell>
-                  <TableCell>{inv.invoice_date}</TableCell>
+                  {/* <TableCell>{inv.invoice_date}</TableCell> */}
+                  <TableCell> {new Date(inv.invoice_date).toLocaleDateString()}</TableCell>
                   <TableCell>{inv.invoice_type}</TableCell>
                   <TableCell>{inv.party_id}</TableCell>
                   <TableCell>{inv.party_name}</TableCell>
@@ -193,7 +208,7 @@ const createPdf= (abc)=>{
                     <span
                       style={{ cursor: "pointer", color: "blue" }}
                       onClick={() =>
-                        router.push(`/dashboard/create_invoice/edit?id=${inv.id}`)
+                        router.push(`/dashboard/invoices/edit?id=${inv.id}`)
                       }
                     >
                       <RemoveRedEyeIcon />

@@ -20,7 +20,7 @@ const secret = process.env.JWT_SECRET;
 
 const res = jwt.verify(got_token,secret);
 
-console.log("This is my responce", res);
+console.log("This is my responce under jwt", res);
 
 if(res)
 {

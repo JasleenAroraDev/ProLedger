@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import Alert from "@mui/material/Alert";
 import {
   Box,
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+
 
 export default function CustomerForm() {
   const {
@@ -29,22 +30,64 @@ export default function CustomerForm() {
       city: "",
       status: "Active",
       address: "",
+      
+      
     },
   });
 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+ const[recUserId, setRecUserId]= useState(null); 
+
+
+    useEffect(() => {
+    const testToken = async () => {
+      try {
+        const resToken = localStorage.getItem("Token");
+
+        if (!resToken) {
+          router.push("/signin");
+        }
+
+        const res = await axios.post("/api/jwt_verify", { resToken });
+
+        console.log("This is my responce",res);
+
+        console.log("This is your responce with id", res.data.received_id);
+
+        setRecUserId(res.data.received_id);
+
+        if (!res.data.valid) {
+           console.log("Valid Token",res.data.valid);
+          router.push("/signin");
+         
+        }
+        
+      } catch (err) {
+        console.log("error", err);
+      }
+    };
+
+    testToken();
+  }, []);
 
   const onSubmit = async (data) => {
+
+    
     try {
       setLoading(true);
       setSuccess("");
       setError("");
 
       console.log("DATA:", data);
+      
 
-      await axios.post("/api/customers_api", data);
+
+await axios.post("/api/customers_api", {
+  ...data,
+  userId: recUserId
+});
 
       setSuccess("Customer added successfully ");
 

@@ -152,6 +152,7 @@ finally{
                 <TableCell>Item Unit</TableCell>
                 <TableCell>Item Qty</TableCell>
                 <TableCell>Sold Qty</TableCell>
+                <TableCell>P Id</TableCell>
                 <TableCell>Action</TableCell>
                 <TableCell>Delete</TableCell>
               </TableRow>
@@ -166,6 +167,7 @@ finally{
                     <TableCell>{item.item_unit}</TableCell>
                     <TableCell>{item.item_qty}</TableCell>
                     <TableCell>{item.sold_qty}</TableCell>
+                     <TableCell>{item.p_id}</TableCell>
 
                     {/* VIEW */}
                     <TableCell>

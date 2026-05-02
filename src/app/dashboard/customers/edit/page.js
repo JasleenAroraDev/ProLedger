@@ -83,7 +83,7 @@ const onSubmit = async (data) => {
              const fetched_data = res.data.data;
 
 setValue('customerName',fetched_data.customer_name);
-setValue('email',fetched_data.email);
+setValue('email',fetched_data.email); 
 setValue('phone', fetched_data.phone_number);
 setValue('gstNumber',fetched_data.gst_number);
 setValue('city',fetched_data.city);

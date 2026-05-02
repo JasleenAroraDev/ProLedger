@@ -1,3 +1,108 @@
+// "use client";
+// import { useState } from "react";
+// import Link from "next/link";
+// import { usePathname } from "next/navigation";
+
+// import {
+//   Box, Drawer, AppBar, Toolbar, Typography,
+//   List, ListItemButton, ListItemIcon, ListItemText,
+//   IconButton, Avatar, Divider
+// } from "@mui/material";
+
+// import MenuIcon from "@mui/icons-material/Menu";
+// import DashboardIcon from "@mui/icons-material/Dashboard";
+// import BusinessIcon from "@mui/icons-material/Business";
+// import PeopleIcon from "@mui/icons-material/People";
+// import InventoryIcon from "@mui/icons-material/Inventory";
+// import StoreIcon from "@mui/icons-material/Store";
+// import ReceiptIcon from "@mui/icons-material/Receipt";
+// import BarChartIcon from "@mui/icons-material/BarChart";
+// import LogoutIcon from "@mui/icons-material/Logout";
+
+// const drawerWidth = 240;
+
+// export default function DashboardLayout({ children }) {
+//   const [open, setOpen] = useState(true);
+//   const pathname = usePathname();
+
+//   const menuItems = [
+//     { name: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+//     { name: "Company", icon: <BusinessIcon />, path: "/dashboard/company" },
+//     { name: "Customers", icon: <PeopleIcon />, path: "/dashboard/customers" },
+//     { name: "Vendors", icon: <StoreIcon />, path: "/dashboard/vendors" },
+//     { name: "Items", icon: <InventoryIcon />, path: "/dashboard/create_item" },
+//     { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard/create_invoice" },
+//     { name: "Reports", icon: <BarChartIcon />, path: "/dashboard" },
+//     { name: "Logout", icon: <LogoutIcon />, path: "/dashboard/logout" },
+//   ];
+
+//   return (
+//     <Box sx={{ display: "flex", bgcolor: "#f4f6f8", minHeight: "100vh" }}>
+      
+//       {/* TOP BAR */}
+//       <AppBar position="fixed" sx={{ zIndex: 1201 }}>
+//         <Toolbar>
+//           <IconButton color="inherit" onClick={() => setOpen(!open)}>
+//             <MenuIcon />
+//           </IconButton>
+//           <Typography sx={{ flexGrow: 1}}>ERP System</Typography>
+//           <Avatar>A</Avatar>
+//         </Toolbar>
+//       </AppBar>
+
+//       {/* SIDEBAR */}
+//       <Drawer
+//         variant="persistent"
+//         open={open}
+//         sx={{
+//           width: drawerWidth,
+//           "& .MuiDrawer-paper": {
+//             width: drawerWidth,
+//             bgcolor: "#1e293b",
+//             color: "#fff",
+//           },
+//         }}
+//       >
+//         <Toolbar />
+//         <Typography sx={{ p: 2 }}>ERP Panel</Typography>
+//         <Divider sx={{ bgcolor: "gray" }} />
+
+//         <List>
+//           {menuItems.map((item) => (
+//             <Link href={item.path} key={item.name} style={{ textDecoration: "none", color: "inherit" }}>
+//               <ListItemButton
+//                 sx={{
+//                   bgcolor: pathname === item.path ? "#334155" : "transparent",
+//                   "&:hover": { bgcolor: "#334155" },
+//                 }}
+//               >
+//                 <ListItemIcon sx={{ color: "#fff" }}>
+//                   {item.icon}
+//                 </ListItemIcon>
+//                 <ListItemText primary={item.name} />
+//               </ListItemButton>
+//             </Link>
+//           ))}
+//         </List>
+//       </Drawer>
+
+//       {/* MAIN CONTENT */}
+//       <Box
+//         component="main"
+//         sx={{
+//           flexGrow: 1,
+//           p: 3,
+//        //   ml: open ? `${drawerWidth}px` : "0px",
+//         }}
+//       >
+//         <Toolbar />
+//         {children}
+//       </Box>
+//     </Box>
+//   );
+// }
+
+
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -15,6 +120,7 @@ import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import StoreIcon from "@mui/icons-material/Store";
+import PaymentIcon from "@mui/icons-material/Payment";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -31,22 +137,39 @@ export default function DashboardLayout({ children }) {
     { name: "Customers", icon: <PeopleIcon />, path: "/dashboard/customers" },
     { name: "Vendors", icon: <StoreIcon />, path: "/dashboard/vendors" },
     { name: "Items", icon: <InventoryIcon />, path: "/dashboard/create_item" },
-    { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard/create_invoice" },
+    { name: "Invoices", icon: <ReceiptIcon />, path: "/dashboard/invoices" },
+    { name: "Payments", icon: <PaymentIcon />, path: "/dashboard/payment" },
+    { name: "Inventory", icon: <InventoryIcon />, path: "/dashboard/inventory" },
     { name: "Reports", icon: <BarChartIcon />, path: "/dashboard" },
     { name: "Logout", icon: <LogoutIcon />, path: "/dashboard/logout" },
   ];
 
   return (
-    <Box sx={{ display: "flex", bgcolor: "#f4f6f8", minHeight: "100vh" }}>
-      
+    <Box sx={{ display: "flex", bgcolor: "#f4f4f5", minHeight: "100vh" }}>
+
       {/* TOP BAR */}
-      <AppBar position="fixed" sx={{ zIndex: 1201 }}>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          zIndex: 1201,
+          bgcolor: "#ffffff",
+          borderBottom: "1px solid #e4e4e7",
+          color: "#18181b",
+        }}
+      >
         <Toolbar>
-          <IconButton color="inherit" onClick={() => setOpen(!open)}>
+          <IconButton onClick={() => setOpen(!open)} sx={{ color: "#18181b" }}>
             <MenuIcon />
           </IconButton>
-          <Typography sx={{ flexGrow: 1}}>ERP System</Typography>
-          <Avatar>A</Avatar>
+
+          <Typography sx={{ flexGrow: 1, fontWeight: 600 }}>
+            ERP System
+          </Typography>
+
+          <Avatar sx={{ bgcolor: "#fb7185", color: "#fff" }}>
+            A
+          </Avatar>
         </Toolbar>
       </AppBar>
 
@@ -58,31 +181,58 @@ export default function DashboardLayout({ children }) {
           width: drawerWidth,
           "& .MuiDrawer-paper": {
             width: drawerWidth,
-            bgcolor: "#1e293b",
-            color: "#fff",
+            bgcolor: "#fafafa",
+            borderRight: "1px solid #e4e4e7",
           },
         }}
       >
         <Toolbar />
-        <Typography sx={{ p: 2 }}>ERP Panel</Typography>
-        <Divider sx={{ bgcolor: "gray" }} />
+
+        <Typography sx={{ p: 2, fontWeight: 600, color: "#18181b" }}>
+          ERP Panel
+        </Typography>
+
+        <Divider />
 
         <List>
-          {menuItems.map((item) => (
-            <Link href={item.path} key={item.name} style={{ textDecoration: "none", color: "inherit" }}>
-              <ListItemButton
-                sx={{
-                  bgcolor: pathname === item.path ? "#334155" : "transparent",
-                  "&:hover": { bgcolor: "#334155" },
-                }}
+          {menuItems.map((item) => {
+            const active = pathname === item.path;
+
+            return (
+              <Link
+                href={item.path}
+                key={item.name}
+                style={{ textDecoration: "none" }}
               >
-                <ListItemIcon sx={{ color: "#fff" }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.name} />
-              </ListItemButton>
-            </Link>
-          ))}
+                <ListItemButton
+                  sx={{
+                    mx: 1,
+                    my: 0.5,
+                    borderRadius: "10px",
+                    bgcolor: active ? "#ffe4e6" : "transparent",
+                    "&:hover": {
+                      bgcolor: "#ffe4e6",
+                    },
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      color: active ? "#fb7185" : "#71717a",
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+
+                  <ListItemText
+                    primary={item.name}
+                    sx={{
+                      color: active ? "#18181b" : "#52525b",
+                    }}
+                  />
+                </ListItemButton>
+              </Link>
+            );
+          })}
         </List>
       </Drawer>
 
@@ -92,7 +242,6 @@ export default function DashboardLayout({ children }) {
         sx={{
           flexGrow: 1,
           p: 3,
-       //   ml: open ? `${drawerWidth}px` : "0px",
         }}
       >
         <Toolbar />

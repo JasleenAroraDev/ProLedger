@@ -99,8 +99,13 @@ export default function CompanyForm() {
       if(rest.status==200)
   {
   setSuccess("company created Successfully");
+    const companyId = rest.data.companyId;
+
+  console.log("Created Company ID:", companyId);
+
+  
    reset();
-     router.push('/dashboard');
+        router.push(`/dashboard?companyId=${companyId}`);
   }
 
     }
@@ -114,7 +119,7 @@ export default function CompanyForm() {
 
        if(err.response.data.message=="Company already exists for this user")
        {
-        router.push("/dashboard");
+        router.push(`/dashboard?companyId=${companyId}`);
        }
       }
    

@@ -320,6 +320,8 @@ export default function CompanyEdit() {
      
         const data = res.data?.data ?? res.data?.[0];
 
+        console.log("This is my data",data);
+
         if (!data) {
           console.error("No company data found");
           setError("Failed to load company data.");

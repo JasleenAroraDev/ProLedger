@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Autocomplete from "@mui/material/Autocomplete";
 import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 // const productOptions = [
 //   { label: "Product A" },
@@ -41,10 +42,11 @@ const [grossTotalAmt, setGrossTotalAmt]=useState(0);
   const [success, setSuccess]= useState("");
 
   const [error, setError] = useState("");
-
+ const[recUserId, setRecUserId]= useState(null); 
 
 
 const [loading, setLoading]=useState(false);
+const router = useRouter();
 
   const {
     control,
@@ -72,6 +74,7 @@ grossTotal:0,
   sgstAmount: 0,
   igstAmount: 0,
      products: [{ productId: "", name: "", qty: "", price: "", amount: 0 }]
+     
     },
   });
 
@@ -126,7 +129,45 @@ const { netTotal, cgstAmount, sgstAmount, igstAmount } = useMemo(() => {
 }, [grossTotal, discount, gstType, cgst, sgst, igst]);
 
 
+  useEffect(() => {
+    const testToken = async () => {
+      try {
+        const resToken = localStorage.getItem("Token");
+
+        if (!resToken) {
+          router.push("/signin");
+        }
+
+        const res = await axios.post("/api/jwt_verify", { resToken });
+
+        console.log("This is my responce",res);
+
+        console.log("This is your responce with id", res.data.received_id);
+
+        setRecUserId(res.data.received_id);
+
+        if (!res.data.valid) {
+           console.log("Valid Token",res.data.valid);
+          router.push("/signin");
+         
+        }
+        
+      } catch (err) {
+        console.log("error", err);
+      }
+    };
+
+    testToken();
+  }, []);
+
+
+
+
   const onSubmit = async (data) => {
+      if (!recUserId) {
+    setError("User not authenticated properly");
+    return;
+  }
     const finalData = {
     ...data,
     cgstAmount,
@@ -134,6 +175,7 @@ const { netTotal, cgstAmount, sgstAmount, igstAmount } = useMemo(() => {
     igstAmount,
     netTotal,
     grossTotal : grossTotalAmt,
+     userId:recUserId,
   };
 
 

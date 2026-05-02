@@ -14,14 +14,14 @@ export async function POST(req){
 
     const res = await req.json();
 
-    const{item_name,item_sku,item_unit}= res;
+    const{item_name,item_sku,item_unit,p_id,userId}= res.payload;
 
-    console.log("This is my result",res);
+    console.log("This is my result",res.payload);
     
     try{
-        const my_query= 'Insert into items (item_sku,item_name,item_unit) values($1,$2,$3)';
+        const my_query= 'Insert into items (item_sku,item_name,item_unit,p_id,user_id) values($1,$2,$3,$4,$5)';
 
-        const value= [item_sku,item_name,item_unit];
+        const value= [item_sku,item_name,item_unit,p_id,userId];
 
         const rest= await pool.query(my_query,value);
 

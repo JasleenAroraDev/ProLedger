@@ -20,7 +20,7 @@ export async function POST(req){
     try{
            
            if(search){
-               const qry= "select * from invoice where lower(vendor_name) like $1";
+               const qry= "select * from invoice where lower(party_name) like $1";
                const value= [`%${search}%`];
                const res= await pool.query(qry,value);
            return NextResponse.json({status:200, data: res.rows});

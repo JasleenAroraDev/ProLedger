@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import Alert from "@mui/material/Alert";
@@ -21,62 +20,50 @@ import EditIcon from "@mui/icons-material/Edit";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { keyframes } from "@mui/system";
 
-export default function CustomersEdit() {
-  const brand = {
-    navy: "#0f172a",
-    primary: "#2563eb",
-    primaryDark: "#1d4ed8",
-    cyan: "#0891b2",
-    cyanDark: "#0e7490",
-    blueLight: "#dbeafe",
-    text: "#334155",
-    muted: "#64748b",
-    border: "#dbe5f0",
-  };
+const brand = {
+  navy: "#0f172a",
+  primary: "#2563eb",
+  primaryDark: "#1d4ed8",
+  cyan: "#0891b2",
+  cyanDark: "#0e7490",
+  blueLight: "#dbeafe",
+  text: "#334155",
+  muted: "#64748b",
+  border: "#dbe5f0",
+};
 
-  const fadeUp = keyframes`
-    from { opacity: 0; transform: translateY(26px); }
-    to { opacity: 1; transform: translateY(0); }
-  `;
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
 
-  const floatSoft = keyframes`
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-    100% { transform: translateY(0); }
-  `;
+const floatSoft = keyframes`
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+`;
 
-  const inputStyle = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "8px",
-      backgroundColor: "#ffffff",
-      color: brand.navy,
-      fontWeight: 600,
-      transition: "0.28s ease",
-      "& fieldset": {
-        borderColor: brand.border,
-      },
-      "&:hover": {
-        transform: "translateY(-2px)",
-      },
-      "&:hover fieldset": {
-        borderColor: brand.primary,
-      },
-      "&.Mui-focused": {
-        transform: "scale(1.01)",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: brand.primary,
-        borderWidth: "2px",
-      },
-    },
-    "& .MuiInputLabel-root": {
-      color: brand.muted,
-      fontWeight: 600,
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: brand.primary,
-    },
-  };
+const inputStyle = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    color: brand.navy,
+    fontWeight: 600,
+    transition: "0.28s ease",
+    "& fieldset": { borderColor: brand.border },
+    "&:hover": { transform: "translateY(-2px)" },
+    "&:hover fieldset": { borderColor: brand.primary },
+    "&.Mui-focused": { transform: "scale(1.01)" },
+    "&.Mui-focused fieldset": { borderColor: brand.primary, borderWidth: "2px" },
+  },
+  "& .MuiInputLabel-root": { color: brand.muted, fontWeight: 600 },
+  "& .MuiInputLabel-root.Mui-focused": { color: brand.primary },
+};
+
+// ─── Inner component: uses useSearchParams ────────────────────────────────────
+function CustomersEditForm() {
+  const searchParams = useSearchParams();
+  const cust_id = searchParams.get("id");
 
   const {
     control,
@@ -95,9 +82,6 @@ export default function CustomersEdit() {
     },
   });
 
-  const searchParams = useSearchParams();
-  const cust_id = searchParams.get("id");
-
   const [edit, setEdit] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -111,9 +95,7 @@ export default function CustomersEdit() {
       setError("");
 
       data.id = parseInt(edit);
-
       await axios.post("/api/customer_update_api", data);
-
       setSuccess("Customer updated successfully");
     } catch (err) {
       console.log(err);
@@ -132,10 +114,7 @@ export default function CustomersEdit() {
       try {
         setPageLoading(true);
 
-        const res = await axios.post("/api/customer_edit_api", {
-          edit: cust_id,
-        });
-
+        const res = await axios.post("/api/customer_edit_api", { edit: cust_id });
         const fetched_data = res.data.data;
 
         setValue("customerName", fetched_data.customer_name);
@@ -157,6 +136,217 @@ export default function CustomersEdit() {
   }, [cust_id, setValue]);
 
   return (
+    <>
+      <Stack spacing={1} sx={{ mb: 2.5, textAlign: "center" }}>
+        <Chip
+          icon={<EditIcon />}
+          label="Edit Customer"
+          sx={{
+            mx: "auto",
+            width: "fit-content",
+            borderRadius: "8px",
+            backgroundColor: brand.blueLight,
+            color: brand.primaryDark,
+            fontWeight: 900,
+            "& .MuiChip-icon": { color: brand.primary },
+          }}
+        />
+        <Typography variant="h4" sx={{ fontWeight: 900, color: brand.navy }}>
+          Edit Customer
+        </Typography>
+        <Typography sx={{ color: brand.muted }}>
+          Update customer details for billing and records.
+        </Typography>
+      </Stack>
+
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+      {pageLoading ? (
+        <Box sx={{ py: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <CircularProgress sx={{ color: brand.primary }} />
+        </Box>
+      ) : (
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Controller
+            name="customerName"
+            control={control}
+            rules={{ required: "Customer Name is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Customer Name"
+                fullWidth
+                margin="normal"
+                error={!!errors.customerName}
+                helperText={errors.customerName?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Controller
+            name="email"
+            control={control}
+            rules={{
+              required: "Email is required",
+              pattern: { value: /^\S+@\S+\.\S+$/, message: "Invalid email" },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                fullWidth
+                margin="normal"
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Controller
+            name="phone"
+            control={control}
+            rules={{
+              required: "Phone is required",
+              minLength: { value: 10, message: "Enter valid 10 digit number" },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Phone Number"
+                fullWidth
+                margin="normal"
+                error={!!errors.phone}
+                helperText={errors.phone?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Controller
+            name="gstNumber"
+            control={control}
+            rules={{
+              required: "GST Number is required",
+              minLength: { value: 15, message: "GST must be 15 characters" },
+            }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="GST Number"
+                fullWidth
+                margin="normal"
+                error={!!errors.gstNumber}
+                helperText={errors.gstNumber?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Controller
+            name="city"
+            control={control}
+            rules={{ required: "City is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="City"
+                fullWidth
+                margin="normal"
+                error={!!errors.city}
+                helperText={errors.city?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Controller
+            name="status"
+            control={control}
+            rules={{ required: "Status is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                select
+                label="Status"
+                fullWidth
+                margin="normal"
+                error={!!errors.status}
+                helperText={errors.status?.message}
+                disabled={loading}
+                sx={inputStyle}
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Inactive">Inactive</MenuItem>
+              </TextField>
+            )}
+          />
+
+          <Controller
+            name="address"
+            control={control}
+            rules={{ required: "Address is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Address"
+                multiline
+                rows={3}
+                fullWidth
+                margin="normal"
+                error={!!errors.address}
+                helperText={errors.address?.message}
+                disabled={loading}
+                sx={inputStyle}
+              />
+            )}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            disabled={loading}
+            endIcon={!loading && <ArrowForwardIcon />}
+            sx={{
+              mt: 3,
+              py: 1.55,
+              borderRadius: "8px",
+              fontWeight: 900,
+              textTransform: "none",
+              color: "#ffffff",
+              background: "linear-gradient(135deg, #2563eb 0%, #0891b2 100%)",
+              boxShadow: "0 18px 38px rgba(37, 99, 235, 0.28)",
+              transition: "all 0.28s ease",
+              "&:hover": {
+                transform: "translateY(-3px)",
+                boxShadow: "0 24px 48px rgba(37, 99, 235, 0.36)",
+                background: "linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%)",
+              },
+              "&.Mui-disabled": { color: "#ffffff", background: "#94a3b8" },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} sx={{ color: "#ffffff" }} />
+            ) : (
+              "Update Customer"
+            )}
+          </Button>
+        </Box>
+      )}
+    </>
+  );
+}
+
+// ─── Outer component: wraps the form in Suspense ──────────────────────────────
+export default function CustomersEdit() {
+  return (
     <Box
       sx={{
         minHeight: "100vh",
@@ -165,8 +355,7 @@ export default function CustomersEdit() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background:
-          "linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #ecfeff 100%)",
+        background: "linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #ecfeff 100%)",
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -195,249 +384,16 @@ export default function CustomersEdit() {
           animation: `${fadeUp} 0.7s ease both, ${floatSoft} 5s ease-in-out 0.8s infinite`,
         }}
       >
-        <Stack spacing={1} sx={{ mb: 2.5, textAlign: "center" }}>
-          <Chip
-            icon={<EditIcon />}
-            label="Edit Customer"
-            sx={{
-              mx: "auto",
-              width: "fit-content",
-              borderRadius: "8px",
-              backgroundColor: brand.blueLight,
-              color: brand.primaryDark,
-              fontWeight: 900,
-              "& .MuiChip-icon": {
-                color: brand.primary,
-              },
-            }}
-          />
-
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 900,
-              color: brand.navy,
-            }}
-          >
-            Edit Customer
-          </Typography>
-
-          <Typography sx={{ color: brand.muted }}>
-            Update customer details for billing and records.
-          </Typography>
-        </Stack>
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
-        )}
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {pageLoading ? (
-          <Box
-            sx={{
-              py: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CircularProgress sx={{ color: brand.primary }} />
-          </Box>
-        ) : (
-          <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-            <Controller
-              name="customerName"
-              control={control}
-              rules={{ required: "Customer Name is required" }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Customer Name"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.customerName}
-                  helperText={errors.customerName?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Controller
-              name="email"
-              control={control}
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: "Invalid email",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Email"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.email}
-                  helperText={errors.email?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Controller
-              name="phone"
-              control={control}
-              rules={{
-                required: "Phone is required",
-                minLength: {
-                  value: 10,
-                  message: "Enter valid 10 digit number",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Phone Number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.phone}
-                  helperText={errors.phone?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Controller
-              name="gstNumber"
-              control={control}
-              rules={{
-                required: "GST Number is required",
-                minLength: {
-                  value: 15,
-                  message: "GST must be 15 characters",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="GST Number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.gstNumber}
-                  helperText={errors.gstNumber?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Controller
-              name="city"
-              control={control}
-              rules={{ required: "City is required" }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="City"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.city}
-                  helperText={errors.city?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Controller
-              name="status"
-              control={control}
-              rules={{ required: "Status is required" }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Status"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.status}
-                  helperText={errors.status?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                >
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
-                </TextField>
-              )}
-            />
-
-            <Controller
-              name="address"
-              control={control}
-              rules={{ required: "Address is required" }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Address"
-                  multiline
-                  rows={3}
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.address}
-                  helperText={errors.address?.message}
-                  disabled={loading}
-                  sx={inputStyle}
-                />
-              )}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              disabled={loading}
-              endIcon={!loading && <ArrowForwardIcon />}
-              sx={{
-                mt: 3,
-                py: 1.55,
-                borderRadius: "8px",
-                fontWeight: 900,
-                textTransform: "none",
-                color: "#ffffff",
-                background:
-                  "linear-gradient(135deg, #2563eb 0%, #0891b2 100%)",
-                boxShadow: "0 18px 38px rgba(37, 99, 235, 0.28)",
-                transition: "all 0.28s ease",
-                "&:hover": {
-                  transform: "translateY(-3px)",
-                  boxShadow: "0 24px 48px rgba(37, 99, 235, 0.36)",
-                  background:
-                    "linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%)",
-                },
-                "&.Mui-disabled": {
-                  color: "#ffffff",
-                  background: "#94a3b8",
-                },
-              }}
-            >
-              {loading ? (
-                <CircularProgress size={24} sx={{ color: "#ffffff" }} />
-              ) : (
-                "Update Customer"
-              )}
-            </Button>
-          </Box>
-        )}
+        {/* Suspense boundary required for useSearchParams during static build */}
+        <Suspense
+          fallback={
+            <Box sx={{ py: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <CircularProgress sx={{ color: brand.primary }} />
+            </Box>
+          }
+        >
+          <CustomersEditForm />
+        </Suspense>
       </Paper>
     </Box>
   );

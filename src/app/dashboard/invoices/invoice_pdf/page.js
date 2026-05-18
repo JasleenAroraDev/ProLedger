@@ -1,4 +1,6 @@
+
 "use client";
+
 import {
   PDFViewer,
   Document,
@@ -9,515 +11,532 @@ import {
   Canvas,
 } from "@react-pdf/renderer";
 
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import axios from 'axios';
+import axios from "axios";
 
+import InvoiceDocument from "./InvoiceDocument";
 
-// Create styles
+import SendPdfButton from "./SendPdfButton";
+
 const styles = StyleSheet.create({
- page: {
-    flexDirection: "column",
+  page: {
     backgroundColor: "#ffffff",
-    padding: 30,
+    padding: 28,
     fontFamily: "Helvetica",
   },
- 
-  // ── Header section ──────────────────────────────────────────────────────────
-  headerView: {
-    backgroundColor: "#1a237e",
-    padding: 25,
-    borderRadius: 6,
-    marginBottom: 16,
-    alignItems: "center",
-    justifyContent: "center",
 
+  topLine: {
+    height: 7,
+    backgroundColor: "#2563eb",
+    borderRadius: 4,
+    marginBottom: 18,
   },
-  headerText: {
-    color: "#ffffff",
-    fontSize: 28,
-    fontFamily: "Helvetica-Bold",
-    letterSpacing: 2,
-  },
-  subHeaderText: {
-    color: "#90caf9",
-    fontSize: 11,
-    marginTop: 4,
 
-  },
- 
-  // ── Info row ────────────────────────────────────────────────────────────────
-  infoRow: {
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 14,
-    backgroundColor: "#f5f5f5",
-    padding: 10,
-    borderRadius: 4,
+    marginBottom: 16,
   },
-  infoBlocks: {
-    flexDirection: "column",
-    flex: 1,
-     marginBottom: 10,
-     width: "100%",        
-  alignItems: "center",
+  companyBox: {
+    width: "63%",
+  },
+  companyName: {
+    fontSize: 27,
+    fontFamily: "Helvetica-Bold",
+    color: "#0f172a",
+    letterSpacing: 1,
+    marginBottom: 5,
+  },
+  tagline: {
+    fontSize: 10,
+    color: "#0891b2",
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 8,
+  },
+  companyText: {
+    fontSize: 8.7,
+    color: "#475569",
+    lineHeight: 1.45,
   },
 
-    infoBlock: {
-    flexDirection: "column",
-    flex: 1,
-     marginBottom: 10,
-    },
-
-  infoLabel: {
-    fontSize: 9,
-    color: "#757575",
+  invoiceBox: {
+    width: "31%",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#dbe5f0",
+    borderRadius: 8,
+    padding: 12,
+  },
+  invoiceTitle: {
+    fontSize: 18,
+    color: "#2563eb",
+    fontFamily: "Helvetica-Bold",
+    textAlign: "right",
     marginBottom: 10,
+  },
+  invoiceMetaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  metaLabel: {
+    fontSize: 8,
+    color: "#64748b",
     fontFamily: "Helvetica-Bold",
     textTransform: "uppercase",
   },
-  infoValue: {
-    fontSize: 11,
-    color: "#212121",
-     marginBottom: 10,
-  },
- 
-  // ── Section title ───────────────────────────────────────────────────────────
-  sectionTitle: {
-    fontSize: 13,
+  metaValue: {
+    fontSize: 9,
+    color: "#0f172a",
     fontFamily: "Helvetica-Bold",
-    color: "#1a237e",
-    marginBottom: 6,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#1a237e",
-    paddingBottom: 3,
   },
- 
-  // ── Table ───────────────────────────────────────────────────────────────────
+
+  partyRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 18,
+  },
+  partyCard: {
+    flex: 1,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#dbe5f0",
+    borderRadius: 8,
+    padding: 12,
+  },
+  partyTitle: {
+    fontSize: 9,
+    color: "#2563eb",
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase",
+    marginBottom: 7,
+  },
+  partyName: {
+    fontSize: 12,
+    color: "#0f172a",
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 6,
+  },
+  partyText: {
+    fontSize: 8.6,
+    color: "#475569",
+    lineHeight: 1.45,
+    marginBottom: 3,
+  },
+
+  sectionBar: {
+    backgroundColor: "#0f172a",
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+    marginBottom: 0,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    color: "#ffffff",
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase",
+  },
+
   table: {
     width: "100%",
-    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#bdbdbd",
-    borderRadius: 4,
+    borderColor: "#dbe5f0",
+    borderTopWidth: 0,
+    borderRadius: 6,
     overflow: "hidden",
+    marginBottom: 16,
   },
   tableHeaderRow: {
     flexDirection: "row",
-    backgroundColor: "#1a237e",
+    backgroundColor: "#eff6ff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#dbe5f0",
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
   },
   tableRowAlt: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    backgroundColor: "#f3f4fb",
+    borderBottomColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
   },
-  tableRowLast: {
-    flexDirection: "row",
-  },
- 
-  // Column widths
-  colNo: { width: "7%", padding: 7 },
-  colDesc: { width: "38%", padding: 7 },
-  colQty: { width: "10%", padding: 7, textAlign: "right" },
-  colRate: { width: "15%", padding: 7, textAlign: "right" },
-  colAmount: { width: "18%", padding: 7, textAlign: "right" },
- 
+
+  colNo: { width: "12%", padding: 8 },
+  colDesc: { width: "38%", padding: 8 },
+  colQty: { width: "12%", padding: 8, textAlign: "right" },
+  colRate: { width: "17%", padding: 8, textAlign: "right" },
+  colAmount: { width: "21%", padding: 8, textAlign: "right" },
+
   tableHeaderCell: {
-    fontSize: 9,
-    color: "#ffffff",
+    fontSize: 8.5,
+    color: "#0f172a",
     fontFamily: "Helvetica-Bold",
     textTransform: "uppercase",
   },
   tableCell: {
-    fontSize: 10,
-    color: "#212121",
+    fontSize: 9.5,
+    color: "#334155",
   },
-  tableCellsMuted: {
-    fontSize: 9,
-    color: "#757575",
-    marginTop: 2,
-    marginBottom: 10,
-    textAlign: "center",
-  
-
-  },
-
-   tableCellMuted: {
-    fontSize: 9,
-    color: "#757575",
-    marginTop: 2,
-    marginBottom: 10,},
- 
-  // ── Totals block ────────────────────────────────────────────────────────────
-  totalsBlock: {
-    alignSelf: "flex-end",
-    width: 200,
-    marginBottom: 16,
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 3,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  totalRowFinal: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 5,
-    backgroundColor: "#1a237e",
-    paddingHorizontal: 6,
-    borderRadius: 3,
-    marginTop: 2,
-  },
-  totalLabel: { fontSize: 10, color: "#424242" },
-  totalValue: { fontSize: 10, color: "#212121" },
-  totalLabelFinal: { fontSize: 11, color: "#ffffff", fontFamily: "Helvetica-Bold" },
-  totalValueFinal: { fontSize: 11, color: "#ffffff", fontFamily: "Helvetica-Bold" },
- 
-  // ── Notes / Link ─────────────────────────────────────────────────────────── 
-  notesView: {
-    backgroundColor: "#fff8e1",
-    borderLeftWidth: 3,
-    borderLeftColor: "#ffc107",
-    padding: 10,
-    marginBottom: 14,
-    borderRadius: 3,
-  },
-  notesTitle: {
-    fontSize: 10,
+  tableCellStrong: {
+    fontSize: 9.5,
+    color: "#0f172a",
     fontFamily: "Helvetica-Bold",
-    marginBottom: 3,
-    color: "#f57f17",
   },
-  notesText: {
+
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  paymentBox: {
+    width: "52%",
+    backgroundColor: "#ecfeff",
+    borderWidth: 1,
+    borderColor: "#cffafe",
+    borderRadius: 8,
+    padding: 11,
+  },
+  paymentTitle: {
     fontSize: 10,
-    color: "#555555",
-    lineHeight: 1.5,
+    color: "#0e7490",
+    fontFamily: "Helvetica-Bold",
+    marginBottom: 5,
   },
-  linkText: {
-    fontSize: 10,
-    color: "#1565c0",
-    textDecoration: "underline",
+  paymentText: {
+    fontSize: 8.7,
+    color: "#334155",
+    lineHeight: 1.45,
   },
- 
-  // ── Footer ───────────────────────────────────────────────────────────────────
+  totalsBox: {
+    width: "45%",
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#dbe5f0",
+    borderRadius: 8,
+    padding: 10,
+  },
+  totalLine: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e2e8f0",
+  },
+  totalLabel: {
+    fontSize: 9.5,
+    color: "#475569",
+  },
+  totalValue: {
+    fontSize: 9.5,
+    color: "#0f172a",
+    fontFamily: "Helvetica-Bold",
+  },
+  grandTotal: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 7,
+    paddingVertical: 8,
+    paddingHorizontal: 9,
+    backgroundColor: "#2563eb",
+    borderRadius: 6,
+  },
+  grandLabel: {
+    fontSize: 11,
+    color: "#ffffff",
+    fontFamily: "Helvetica-Bold",
+  },
+  grandValue: {
+    fontSize: 11,
+    color: "#ffffff",
+    fontFamily: "Helvetica-Bold",
+  },
+
+  verifiedBadge: {
+    backgroundColor: "#dcfce7",
+    borderRadius: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    alignSelf: "flex-start",
+    marginTop: 12,
+  },
+  verifiedText: {
+    color: "#059669",
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+  },
+
   footer: {
     position: "absolute",
-    bottom: 20,
-    left: 30,
-    right: 30,
+    bottom: 18,
+    left: 28,
+    right: 28,
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
-    paddingTop: 6,
+    borderTopColor: "#dbe5f0",
+    paddingTop: 7,
   },
   footerText: {
     fontSize: 8,
-    color: "#9e9e9e",
-  },
- 
-  // ── Badge ────────────────────────────────────────────────────────────────────
-  badge: {
-    backgroundColor: "#e8f5e9",
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    alignSelf: "flex-start",
-    marginBottom: 12,
-  },
-  badgeText: {
-    color: "#2e7d32",
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    color: "#64748b",
   },
 });
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const invoiceItems = [
-  // { no: "01", desc: "Website Design", note: "UI/UX mockups & prototypes", qty: 1, rate: 45000,  },
-  // { no: "02", desc: "Frontend Development", note: "React + Tailwind", qty: 3, rate: 25000,  },
-  // { no: "03", desc: "Backend API", note: "Node.js REST API", qty: 2, rate: 30000,  },
-  // { no: "04", desc: "Database Setup", note: "PostgreSQL schema", qty: 1, rate: 15000,  },
-  // { no: "05", desc: "Deployment & DevOps", note: "AWS EC2 + CI/CD", qty: 1, rate: 20000, },
-];
- 
-const fmt = (n) => `₹${n.toLocaleString("en-IN")}`;
- 
-const subtotal = invoiceItems.reduce((s, i) => s + i.qty * i.rate, 0);
-const taxTotal = invoiceItems.reduce((s, i) => s + (i.qty * i.rate * i.tax) / 100, 0);
-
-
-const grandTotal = subtotal + taxTotal;
-
-
-// Create Document Component
 const MyDocument = () => {
   const searchParams = useSearchParams();
   const inv_id = searchParams.get("id");
 
-  const [id, setId] = useState();
-  const [inv, setInv] = useState([]);
+  const [inv, setInv] = useState(null);
   const [items, setItems] = useState([]);
 
-  console.log("my recieved id is ", inv_id);
-
   useEffect(() => {
-    setId(inv_id);
-
     if (!inv_id) return;
-
 
     const invData = async () => {
       try {
-        console.log("im under call");
         const res = await axios.post("/api/invoice_pdf_api", { id: inv_id });
 
-        console.log("This is my res", res.data.invoice);
-        console.log("This is my items res", res.data.invoice_items);
-
-        setInv(res?.data?.invoice[0]);
-        setItems(res?.data?.invoice_items);
-
-
+        setInv(res?.data?.invoice?.[0]);
+        setItems(res?.data?.invoice_items || []);
       } catch (err) {
         console.log("This is your err", err);
       }
     };
 
     invData();
-  }, [id]);
+  }, [inv_id]);
 
   return (
+<>
+
+    <SendPdfButton inv={inv} items={items} />   {/* ← button sits above viewer */}
+
+
     <PDFViewer width="100%" height={820} style={{ border: "none" }}>
-      <Document
+      {/* <Document
         title="ProLedger Invoice"
         author="Jass Arora"
-        subject="Invoice INV-2024-042"
+        subject="Invoice"
         creator="ProLedger"
         producer="@react-pdf/renderer"
       >
         <Page size="A4" style={styles.page}>
-          <View style={styles.headerView}>
-            <Text style={styles.headerText}>{process.env.NEXT_PUBLIC_COMP_NAME}</Text>
-            <Text style={styles.subHeaderText}>
-              {process.env.NEXT_PUBLIC_TAGLINE}
-            </Text>
-            <View style={styles.infoBlocks}>
-              <Text style={styles.tableCellsMuted}>
-                From: {process.env.NEXT_PUBLIC_COMP_ADDRESS}, {process.env.NEXT_PUBLIC_COMP_CITY} , {process.env.NEXT_PUBLIC_COMP_STATE}
+          <View style={styles.topLine} />
+
+          <View style={styles.headerRow}>
+            <View style={styles.companyBox}>
+              <Text style={styles.companyName}>
+                {process.env.NEXT_PUBLIC_COMP_NAME}
               </Text>
-              <Text style={styles.tableCellsMuted}>
+
+              <Text style={styles.tagline}>
+                {process.env.NEXT_PUBLIC_TAGLINE}
+              </Text>
+
+              <Text style={styles.companyText}>
+                {process.env.NEXT_PUBLIC_COMP_ADDRESS},{" "}
+                {process.env.NEXT_PUBLIC_COMP_CITY},{" "}
+                {process.env.NEXT_PUBLIC_COMP_STATE},{" "}
+                {process.env.NEXT_PUBLIC_COMP_PINCODE}
+              </Text>
+
+              <Text style={styles.companyText}>
+                GSTIN: {process.env.NEXT_PUBLIC_COMP_GSTIN} | PAN:{" "}
+                {process.env.NEXT_PUBLIC_COMP_PAN}
+              </Text>
+
+              <Text style={styles.companyText}>
+                Phone: {process.env.NEXT_PUBLIC_COMP_PHONE} | Email:{" "}
+                {process.env.NEXT_PUBLIC_COMP_EMAIL}
+              </Text>
+            </View>
+
+            <View style={styles.invoiceBox}>
+              <Text style={styles.invoiceTitle}>INVOICE</Text>
+
+              <View style={styles.invoiceMetaRow}>
+                <Text style={styles.metaLabel}>No</Text>
+                <Text style={styles.metaValue}>#{inv?.invoice_no}</Text>
+              </View>
+
+              <View style={styles.invoiceMetaRow}>
+                <Text style={styles.metaLabel}>Date</Text>
+                <Text style={styles.metaValue}>
+                  {inv?.invoice_date?.split("T")[0]}
+                </Text>
+              </View>
+
+              <View style={styles.invoiceMetaRow}>
+                <Text style={styles.metaLabel}>Type</Text>
+                <Text style={styles.metaValue}>{inv?.invoice_type}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.partyRow}>
+            <View style={styles.partyCard}>
+              <Text style={styles.partyTitle}>Billed To</Text>
+              <Text style={styles.partyName}>{inv?.party_name}</Text>
+              <Text style={styles.partyText}>GSTIN: {inv?.gst_no}</Text>
+              <Text style={styles.partyText}>PAN: {inv?.pan_no}</Text>
+            </View>
+
+            <View style={styles.partyCard}>
+              <Text style={styles.partyTitle}>Billed From</Text>
+              <Text style={styles.partyName}>
+                {process.env.NEXT_PUBLIC_COMP_NAME}
+              </Text>
+              <Text style={styles.partyText}>
+                {process.env.NEXT_PUBLIC_COMP_ADDRESS},{" "}
+                {process.env.NEXT_PUBLIC_COMP_CITY},{" "}
+                {process.env.NEXT_PUBLIC_COMP_STATE}
+              </Text>
+              <Text style={styles.partyText}>
                 GSTIN: {process.env.NEXT_PUBLIC_COMP_GSTIN}
               </Text>
-            </View>
-          </View>
-
-          <View style={styles.infoRow}>
-            <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>Invoice No</Text>
-              <Text style={styles.infoValue}>#{inv?.invoice_no}</Text>
-            </View>
-            <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>Date</Text>
-              <Text style={styles.infoValue}> {inv?.invoice_date?.split("T")[0]}</Text>
-            </View>
-
-            {/* <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>Status</Text>
-              <Text
-                style={[
-                  styles.infoValue,
-                  { color: "#2e7d32", fontFamily: "Helvetica-Bold" },
-                ]}
-              >
-                UNPAID
+              <Text style={styles.partyText}>
+                PAN: {process.env.NEXT_PUBLIC_COMP_PAN}
               </Text>
-            </View> */}
-          </View>
-
-          <View style={[styles.infoRow, { marginBottom: 16 }]}>
-            <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>Billed To</Text>
-              <Text style={styles.infoValue}>{inv?.party_name}</Text>
-              <Text style={styles.tableCellMuted}>GSTIN : {inv?.gst_no}</Text>
-              <Text style={styles.tableCellMuted}>PAN : {inv?.pan_no}</Text>
-             
-            </View>
-            <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>Billed From</Text>
-              <Text style={styles.infoValue}>{process.env.NEXT_PUBLIC_COMP_NAME}</Text>
-              <Text style={styles.tableCellMuted}>{process.env.NEXT_PUBLIC_COMP_ADDRESS}, {process.env.NEXT_PUBLIC_COMP_CITY} , {process.env.NEXT_PUBLIC_COMP_STATE} , {process.env.NEXT_PUBLIC_COMP_PINCODE}</Text>
-              <Text style={styles.tableCellMuted}>PHONE : {process.env.NEXT_PUBLIC_COMP_PHONE} , EMAIL : {process.env.NEXT_PUBLIC_COMP_EMAIL}</Text>
-              <Text style={styles.tableCellMuted}>GSTIN : {process.env.NEXT_PUBLIC_COMP_GSTIN}</Text>
-               <Text style={styles.tableCellMuted}>PAN : {process.env.NEXT_PUBLIC_COMP_PAN}</Text>
-          
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>Invoice Items</Text>
+          <View style={styles.sectionBar}>
+            <Text style={styles.sectionTitle}>Invoice Items</Text>
+          </View>
 
           <View style={styles.table}>
             <View style={styles.tableHeaderRow}>
               <View style={styles.colNo}>
-                <Text style={styles.tableHeaderCell}>Item Id</Text>
+                <Text style={styles.tableHeaderCell}>Item ID</Text>
               </View>
+
               <View style={styles.colDesc}>
                 <Text style={styles.tableHeaderCell}>Item Name</Text>
               </View>
+
               <View style={styles.colQty}>
-                <Text
-                  style={[styles.tableHeaderCell, { textAlign: "right" }]}
-                >
+                <Text style={[styles.tableHeaderCell, { textAlign: "right" }]}>
                   Qty
                 </Text>
               </View>
+
               <View style={styles.colRate}>
-                <Text
-                  style={[styles.tableHeaderCell, { textAlign: "right" }]}
-                >
+                <Text style={[styles.tableHeaderCell, { textAlign: "right" }]}>
                   Rate
                 </Text>
               </View>
+
               <View style={styles.colAmount}>
-                <Text
-                  style={[styles.tableHeaderCell, { textAlign: "right" }]}
-                >
+                <Text style={[styles.tableHeaderCell, { textAlign: "right" }]}>
                   Amount
                 </Text>
               </View>
             </View>
 
-            {items.map((item, idx) => {
-              const isLast = idx === items.length - 1;
-
-              const rowStyle = isLast
-                ? styles.tableRowLast
-                : idx % 2 === 0
-                ? styles.tableRow
-                : styles.tableRowAlt;
-
-              const amount = items.qty * item.item_price;
-
-              return (
-                <View key={idx} style={rowStyle}>
-                  <View style={styles.colNo}>
-                    <Text style={styles.tableCell}>
-                      {item?.id}
-                    </Text>
-                  </View>
-
-                  <View style={styles.colDesc}>
-                    <Text style={styles.tableCell}>
-                      {item?.item_name}
-                    </Text>
-                  </View>
-
-                  <View style={styles.colQty}>
-                    <Text
-                      style={[styles.tableCell, { textAlign: "right" }]}
-                    >
-                      {item?.item_qty}
-                    </Text>
-                  </View>
-
-                  <View style={styles.colRate}>
-                    <Text
-                      style={[styles.tableCell, { textAlign: "right" }]}
-                    >
-                      {item?.item_price}
-                    </Text>
-                  </View>
-
-                  <View style={styles.colAmount}>
-                    <Text
-                      style={[styles.tableCell, { textAlign: "right" }]}
-                    >
-                      {item?.final_amt}
-                    </Text>
-                  </View>
+            {items.map((item, idx) => (
+              <View
+                key={idx}
+                style={idx % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
+              >
+                <View style={styles.colNo}>
+                  <Text style={styles.tableCell}>{item?.id}</Text>
                 </View>
-              );
-            })}
+
+                <View style={styles.colDesc}>
+                  <Text style={styles.tableCellStrong}>{item?.item_name}</Text>
+                </View>
+
+                <View style={styles.colQty}>
+                  <Text style={[styles.tableCell, { textAlign: "right" }]}>
+                    {item?.item_qty}
+                  </Text>
+                </View>
+
+                <View style={styles.colRate}>
+                  <Text style={[styles.tableCell, { textAlign: "right" }]}>
+                    {item?.item_price}
+                  </Text>
+                </View>
+
+                <View style={styles.colAmount}>
+                  <Text style={[styles.tableCellStrong, { textAlign: "right" }]}>
+                    {item?.final_amt}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
 
-          <View style={styles.totalsBlock}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal</Text>
-              <Text style={styles.totalValue}>
-                {inv?.gross_total}
+          <View style={styles.summaryRow}>
+            <View style={styles.paymentBox}>
+              <Text style={styles.paymentTitle}>Payment Note</Text>
+              <Text style={styles.paymentText}>
+                This invoice is generated from ProLedger ERP. Please verify
+                billing, GST, and payment details before processing.
               </Text>
             </View>
 
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Discount</Text>
-              <Text style={styles.totalValue}>
-                {inv?.discount}
-              </Text>
-            </View>
-             {inv?.cgst_pers > 0 && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>CGST : {inv?.cgst_pers}%</Text>
-              <Text style={styles.totalValue}>
-                {inv?.cgst_amt}
-              </Text>
-            </View>
+            <View style={styles.totalsBox}>
+              <View style={styles.totalLine}>
+                <Text style={styles.totalLabel}>Subtotal</Text>
+                <Text style={styles.totalValue}>{inv?.gross_total}</Text>
+              </View>
 
-            )}
+              <View style={styles.totalLine}>
+                <Text style={styles.totalLabel}>Discount</Text>
+                <Text style={styles.totalValue}>{inv?.discount}</Text>
+              </View>
 
-           {inv?.sgst_pers > 0 && (
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>SGST : {inv?.sgst_pers}%</Text>
-              <Text style={styles.totalValue}>
-                {inv?.sgst_amt}
-              </Text>
-            </View>
-           )}
+              {inv?.cgst_pers > 0 && (
+                <View style={styles.totalLine}>
+                  <Text style={styles.totalLabel}>CGST {inv?.cgst_pers}%</Text>
+                  <Text style={styles.totalValue}>{inv?.cgst_amt}</Text>
+                </View>
+              )}
 
-           {inv?.igst_pers > 0 &&(
+              {inv?.sgst_pers > 0 && (
+                <View style={styles.totalLine}>
+                  <Text style={styles.totalLabel}>SGST {inv?.sgst_pers}%</Text>
+                  <Text style={styles.totalValue}>{inv?.sgst_amt}</Text>
+                </View>
+              )}
 
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>IGST : {inv?.igst_pers}%</Text>
-              <Text style={styles.totalValue}>
-                {inv?.igst_amt}
-              </Text>
-            </View>
+              {inv?.igst_pers > 0 && (
+                <View style={styles.totalLine}>
+                  <Text style={styles.totalLabel}>IGST {inv?.igst_pers}%</Text>
+                  <Text style={styles.totalValue}>{inv?.igst_amt}</Text>
+                </View>
+              )}
 
-            )}
-
-            <View style={styles.totalRowFinal}>
-              <Text style={styles.totalLabelFinal}>
-                Grand Total
-              </Text>
-              <Text style={styles.totalValueFinal}>
-                {inv?.net_total}
-              </Text>
+              <View style={styles.grandTotal}>
+                <Text style={styles.grandLabel}>Grand Total</Text>
+                <Text style={styles.grandValue}>{inv?.net_total}</Text>
+              </View>
             </View>
           </View>
 
-          {/* ── Badge ── */}
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>
+          <View style={styles.verifiedBadge}>
+            <Text style={styles.verifiedText}>
               {process.env.NEXT_PUBLIC_VERIFIED}
             </Text>
           </View>
 
           <Canvas
-            style={{ height: 30, marginBottom: 10 }}
+            style={{ height: 28, marginTop: 6 }}
             paint={(painter, availableWidth) => {
               painter
                 .save()
-                .moveTo(0, 15)
-                .lineTo(availableWidth, 15)
+                .moveTo(0, 14)
+                .lineTo(availableWidth, 14)
                 .dash(4, { space: 4 })
-                .strokeColor("#bdbdbd")
+                .strokeColor("#cbd5e1")
                 .stroke()
                 .restore();
             }}
@@ -525,7 +544,9 @@ const MyDocument = () => {
 
           <View style={styles.footer} fixed>
             <Text style={styles.footerText}>
-              {process.env.NEXT_PUBLIC_COMP_NAME} — {process.env.NEXT_PUBLIC_COMP_CITY} , {process.env.NEXT_PUBLIC_COMP_STATE}
+              {process.env.NEXT_PUBLIC_COMP_NAME} —{" "}
+              {process.env.NEXT_PUBLIC_COMP_CITY},{" "}
+              {process.env.NEXT_PUBLIC_COMP_STATE}
             </Text>
 
             <Text
@@ -536,8 +557,14 @@ const MyDocument = () => {
             />
           </View>
         </Page>
-      </Document>
+      </Document> */}
+
+
+            <InvoiceDocument inv={inv} items={items} /> 
     </PDFViewer>
+
+    </>
   );
 };
+
 export default MyDocument;

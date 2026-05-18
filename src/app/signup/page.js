@@ -257,10 +257,12 @@
 
 
 
+
 "use client";
 
 import React, { useState } from "react";
 import Alert from "@mui/material/Alert";
+
 import {
   TextField,
   Button,
@@ -274,49 +276,69 @@ import {
   Stack,
   Chip,
 } from "@mui/material";
+
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+
 import ShieldIcon from "@mui/icons-material/Shield";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LoginIcon from "@mui/icons-material/Login";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+
 import { keyframes } from "@mui/system";
 
 export default function SignUpForm() {
   const router = useRouter();
 
   const brand = {
-    navy: "#0f172a",
+    navy: "#f8fafc",
+
     primary: "#2563eb",
     primaryDark: "#1d4ed8",
     cyan: "#0891b2",
-    emerald: "#059669",
-    blueLight: "#dbeafe",
-    surface: "#ffffff",
-    text: "#334155",
-    muted: "#64748b",
-    border: "#dbe5f0",
+    emerald: "#0ea5e9",
+
+    blueLight: "rgba(37,99,235,0.16)",
+    cyanLight: "rgba(8,145,178,0.16)",
+    emeraldLight: "rgba(14,165,233,0.16)",
+
+    border: "rgba(255,255,255,0.18)",
+
+    text: "#e0f2fe",
+    muted: "#dbeafe",
+
+    card: "rgba(255,255,255,0.14)",
+    input: "rgba(255,255,255,0.22)",
   };
 
   const fadeUp = keyframes`
-    from { opacity: 0; transform: translateY(28px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   `;
 
   const floatSoft = keyframes`
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0); }
-  `;
+    0% {
+      transform: translateY(0);
+    }
 
-  const pulse = keyframes`
-    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.25); }
-    70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    50% {
+      transform: translateY(-8px);
+    }
+
+    100% {
+      transform: translateY(0);
+    }
   `;
 
   const {
@@ -343,28 +365,43 @@ export default function SignUpForm() {
   const passwordValue = watch("password");
 
   const inputStyle = {
+    width: "100%",
+
     "& .MuiOutlinedInput-root": {
-      borderRadius: "8px",
-      backgroundColor: "#ffffff",
-      color: brand.navy,
+      borderRadius: "12px",
+      backgroundColor: brand.input,
+      color: "#0f172a",
       fontWeight: 600,
+
       "& fieldset": {
-        borderColor: brand.border,
+        borderColor: "rgba(255,255,255,0.22)",
       },
+
       "&:hover fieldset": {
-        borderColor: brand.primary,
+        borderColor: "#60a5fa",
       },
+
       "&.Mui-focused fieldset": {
-        borderColor: brand.primary,
+        borderColor: "#2563eb",
         borderWidth: "2px",
       },
     },
+
     "& .MuiInputLabel-root": {
-      color: brand.muted,
+      color: "#1e3a8a",
       fontWeight: 600,
     },
+
     "& .MuiInputLabel-root.Mui-focused": {
-      color: brand.primary,
+      color: "#2563eb",
+    },
+
+    "& input": {
+      color: "#0f172a",
+    },
+
+    "& .MuiFormHelperText-root": {
+      color: "#dc2626",
     },
   };
 
@@ -377,13 +414,13 @@ export default function SignUpForm() {
 
       const res = await axios.post("/api/signup_api", data);
 
-      if (res.status == 200) {
+      if (res.status === 200) {
         setSuccess("Signed up successfully");
         reset();
         router.push("/signin");
       }
     } catch (err) {
-      if (err.status == 409) {
+      if (err?.response?.status === 409) {
         setError("This email already exists!");
       } else {
         setError("Signup failed");
@@ -393,64 +430,99 @@ export default function SignUpForm() {
     }
   };
 
+  const features = [
+    {
+      icon: <ReceiptLongIcon />,
+      title: "Billing",
+      text: "Create invoices faster",
+      color: "#2563eb",
+      bg: "rgba(37,99,235,0.14)",
+    },
+
+    {
+      icon: <AssessmentIcon />,
+      title: "Reports",
+      text: "View business insights",
+      color: "#0891b2",
+      bg: "rgba(8,145,178,0.14)",
+    },
+
+    {
+      icon: <PeopleAltIcon />,
+      title: "Customers",
+      text: "Manage customer records",
+      color: "#0284c7",
+      bg: "rgba(2,132,199,0.14)",
+    },
+  ];
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
-        background:
-          "radial-gradient(circle at 12% 12%, rgba(37,99,235,0.14), transparent 30%), radial-gradient(circle at 88% 20%, rgba(8,145,178,0.14), transparent 28%), linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #ecfeff 100%)",
+        px: 2,
+        py: { xs: 4, md: 6 },
+
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        px: 2,
-        py: { xs: 4, md: 6 },
+
+        position: "relative",
+        overflow: "hidden",
+
+        // LIGHT SKY BLUE BACKGROUND
+        background:
+          "linear-gradient(135deg, #e0f2fe 0%, #dbeafe 45%, #bae6fd 100%)",
+
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+
+          backgroundImage:
+            "linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px)",
+
+          backgroundSize: "42px 42px",
+        },
       }}
     >
       <Grid
         container
+        spacing={{ xs: 3, md: 5 }}
+        alignItems="center"
         sx={{
           width: "100%",
-          maxWidth: "1140px",
-          minHeight: { xs: "auto", md: "680px" },
-          borderRadius: "8px",
-          overflow: "hidden",
-          backgroundColor: "rgba(255,255,255,0.86)",
-          border: `1px solid ${brand.blueLight}`,
-          boxShadow: "0 34px 90px rgba(15, 23, 42, 0.16)",
-          backdropFilter: "blur(18px)",
-          animation: `${fadeUp} 0.75s ease both`,
+          maxWidth: "1180px",
+          position: "relative",
+          zIndex: 1,
+          animation: `${fadeUp} 0.7s ease both`,
         }}
       >
-        <Grid
-          item
-          xs={12}
-          md={5}
-          sx={{
-            display: { xs: "none", md: "flex" },
-            position: "relative",
-            overflow: "hidden",
-            p: 4,
-            color: "#ffffff",
-            background:
-              "linear-gradient(145deg, #0f172a 0%, #1d4ed8 58%, #0891b2 100%)",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Stack spacing={3} sx={{ position: "relative", zIndex: 1 }}>
+        {/* LEFT SECTION */}
+
+        <Grid item xs={12} md={6}>
+          <Stack spacing={3}>
             <Box
               sx={{
                 width: "fit-content",
-                backgroundColor: "#ffffff",
-                borderRadius: "8px",
                 p: 1.1,
+                borderRadius: "14px",
+
+                background: "rgba(255,255,255,0.45)",
+
+                border: `1px solid rgba(255,255,255,0.5)`,
+
+                backdropFilter: "blur(18px)",
+
+                boxShadow: "0 12px 30px rgba(37,99,235,0.12)",
               }}
             >
               <img
                 src="/proLedgerLogo.png"
                 alt="ProLedger Logo"
                 style={{
-                  width: "165px",
+                  width: "260px",
+                  maxWidth: "100%",
                   height: "auto",
                   display: "block",
                 }}
@@ -459,351 +531,430 @@ export default function SignUpForm() {
 
             <Chip
               icon={<ShieldIcon />}
-              label="Secure ERP Signup"
+              label="Secure ERP Workspace"
               sx={{
                 width: "fit-content",
-                borderRadius: "8px",
-                backgroundColor: "rgba(255,255,255,0.13)",
-                color: "#ffffff",
+
+                borderRadius: "10px",
+
+                background: "rgba(255,255,255,0.45)",
+
+                color: "#1e3a8a",
+
                 fontWeight: 900,
-                border: "1px solid rgba(255,255,255,0.22)",
-                animation: `${pulse} 2.8s infinite`,
-                "& .MuiChip-icon": { color: "#ffffff" },
+
+                border: `1px solid rgba(255,255,255,0.5)`,
+
+                "& .MuiChip-icon": {
+                  color: "#2563eb",
+                },
               }}
             />
 
-            <Typography
-              sx={{
-                fontSize: "2.35rem",
-                lineHeight: 1.08,
-                fontWeight: 900,
-                letterSpacing: 0,
-              }}
-            >
-              Start managing your business with a smarter ERP system.
-            </Typography>
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: { xs: "2.3rem", md: "3.3rem" },
+                  lineHeight: 1.05,
+                  fontWeight: 900,
+                  color: "#0f172a",
+                  maxWidth: 610,
+                }}
+              >
+                Create your ERP workspace for smarter business control.
+              </Typography>
 
-            <Typography sx={{ color: "#dbeafe", lineHeight: 1.7 }}>
-              Create your ProLedger account to control billing, accounting,
-              inventory, customers, suppliers, and reports from one dashboard.
-            </Typography>
+              <Typography
+                sx={{
+                  mt: 2,
+                  color: "#334155",
+                  fontSize: "1.05rem",
+                  lineHeight: 1.8,
+                  maxWidth: 560,
+                }}
+              >
+                Start using ProLedger to manage billing, accounting,
+                inventory, customers, suppliers, GST reports, and
+                business analytics from one professional dashboard.
+              </Typography>
+            </Box>
+
+            <Grid container spacing={1.5}>
+              {features.map((item) => (
+                <Grid item xs={12} sm={4} key={item.title}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 1.8,
+
+                      borderRadius: "14px",
+
+                      border: `1px solid rgba(255,255,255,0.5)`,
+
+                      background: "rgba(255,255,255,0.38)",
+
+                      backdropFilter: "blur(16px)",
+
+                      boxShadow:
+                        "0 10px 25px rgba(37,99,235,0.08)",
+                    }}
+                  >
+                    <Stack spacing={1}>
+                      <Box
+                        sx={{
+                          width: 42,
+                          height: 42,
+
+                          borderRadius: "10px",
+
+                          display: "grid",
+                          placeItems: "center",
+
+                          color: item.color,
+                          backgroundColor: item.bg,
+                        }}
+                      >
+                        {item.icon}
+                      </Box>
+
+                      <Box>
+                        <Typography
+                          fontWeight={800}
+                          sx={{ color: "#0f172a" }}
+                        >
+                          {item.title}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "#475569" }}
+                        >
+                          {item.text}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
 
             <Paper
               elevation={0}
               sx={{
                 p: 2,
-                borderRadius: "8px",
-                backgroundColor: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                animation: `${floatSoft} 4.8s ease-in-out infinite`,
+                maxWidth: 560,
+
+                borderRadius: "18px",
+
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.20) 100%)",
+
+                border: `1px solid rgba(255,255,255,0.5)`,
+
+                backdropFilter: "blur(18px)",
+
+                animation: `${floatSoft} 5s ease-in-out infinite`,
+
+                boxShadow: "0 14px 40px rgba(37,99,235,0.10)",
               }}
             >
               <img
-                src="/landingPhoto.png"
-                alt="ERP Signup"
+                src="/landingImage.png"
+                alt="ERP Illustration"
                 style={{
                   width: "100%",
                   height: "auto",
-                  display: "block",
                   objectFit: "contain",
+                  display: "block",
                 }}
               />
             </Paper>
-
-            <Stack spacing={1.2}>
-              {[
-                {
-                  icon: <TrendingUpIcon />,
-                  text: "Live sales and profit tracking",
-                },
-                {
-                  icon: <AccountBalanceIcon />,
-                  text: "GST-ready accounting reports",
-                },
-                {
-                  icon: <InventoryIcon />,
-                  text: "Smart inventory management",
-                },
-              ].map((item) => (
-                <Stack
-                  key={item.text}
-                  direction="row"
-                  spacing={1.2}
-                  alignItems="center"
-                >
-                  <Box
-                    sx={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: "8px",
-                      display: "grid",
-                      placeItems: "center",
-                      backgroundColor: "rgba(255,255,255,0.14)",
-                    }}
-                  >
-                    {item.icon}
-                  </Box>
-                  <Typography fontWeight={800}>{item.text}</Typography>
-                </Stack>
-              ))}
-            </Stack>
           </Stack>
         </Grid>
 
-        <Grid
-          item
-          xs={12}
-          md={7}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box
+        {/* RIGHT SECTION */}
+
+        <Grid item xs={12} md={6}>
+          <Paper
+            elevation={0}
             sx={{
               width: "100%",
-              minHeight: { xs: "auto", md: "680px" },
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: { xs: 2.4, sm: 4, md: 5 },
+              maxWidth: 520,
+
+              ml: { xs: "auto", md: "auto" },
+              mr: "auto",
+
+              p: { xs: 2.5, sm: 4 },
+
+              borderRadius: "20px",
+
+              background: "rgba(255,255,255,0.40)",
+
+              border: `1px solid rgba(255,255,255,0.5)`,
+
+              backdropFilter: "blur(18px)",
+
+              boxShadow: "0 20px 60px rgba(37,99,235,0.12)",
             }}
           >
-            <Box
+            <Stack spacing={1} sx={{ mb: 2.5, textAlign: "center" }}>
+              <Chip
+                icon={<CheckCircleIcon />}
+                label="Start free"
+                sx={{
+                  mx: "auto",
+
+                  width: "fit-content",
+
+                  borderRadius: "10px",
+
+                  backgroundColor: "rgba(37,99,235,0.12)",
+
+                  color: "#1e3a8a",
+
+                  fontWeight: 900,
+
+                  "& .MuiChip-icon": {
+                    color: "#2563eb",
+                  },
+                }}
+              />
+
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 900,
+                  color: "#0f172a",
+                }}
+              >
+                Create Account
+              </Typography>
+
+              <Typography sx={{ color: "#475569" }}>
+                Enter your details to activate your ERP dashboard.
+              </Typography>
+            </Stack>
+
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Controller
+              name="fullName"
+              control={control}
+              rules={{ required: "Full Name is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Full Name"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.fullName}
+                  helperText={errors.fullName?.message}
+                  sx={inputStyle}
+                />
+              )}
+            />
+
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Invalid email format",
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Email Address"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.email}
+                  helperText={errors.email?.message}
+                  sx={inputStyle}
+                />
+              )}
+            />
+
+            <Controller
+              name="phoneNumber"
+              control={control}
+              rules={{ required: "Phone Number is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Phone Number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber?.message}
+                  sx={inputStyle}
+                />
+              )}
+            />
+
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Minimum 6 characters",
+                },
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Password"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                  sx={inputStyle}
+                />
+              )}
+            />
+
+            <Controller
+              name="confirmPassword"
+              control={control}
+              rules={{
+                required: "Confirm your password",
+
+                validate: (value) =>
+                  value === passwordValue ||
+                  "Passwords do not match",
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.confirmPassword}
+                  helperText={errors.confirmPassword?.message}
+                  sx={inputStyle}
+                />
+              )}
+            />
+
+            <FormGroup sx={{ mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Controller
+                    name="terms"
+                    control={control}
+                    rules={{
+                      required: "Accept terms & conditions",
+                    }}
+                    render={({ field }) => (
+                      <Checkbox
+                        {...field}
+                        checked={field.value}
+                        sx={{
+                          color: brand.primary,
+
+                          "&.Mui-checked": {
+                            color: brand.primary,
+                          },
+                        }}
+                      />
+                    )}
+                  />
+                }
+                label={
+                  <Typography sx={{ color: "#475569" }}>
+                    I agree to the Terms & Conditions
+                  </Typography>
+                }
+              />
+
+              {errors.terms && (
+                <Typography color="error" variant="body2">
+                  {errors.terms.message}
+                </Typography>
+              )}
+            </FormGroup>
+
+            <Button
+              fullWidth
+              onClick={handleSubmit(onSubmit)}
+              endIcon={<ArrowForwardIcon />}
+              disabled={loading}
               sx={{
-                width: "100%",
-                maxWidth: 540,
-                mx: "auto",
+                mt: 3,
+                py: 1.5,
+
+                borderRadius: "12px",
+
+                fontWeight: 900,
+
+                textTransform: "none",
+
+                color: "#ffffff",
+
+                background:
+                  "linear-gradient(135deg, #2563eb 0%, #0891b2 100%)",
+
+                boxShadow:
+                  "0 14px 30px rgba(37, 99, 235, 0.20)",
+
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%)",
+                },
               }}
             >
-              <Stack spacing={1} sx={{ mb: 2.5, textAlign: "center" }}>
-                <Typography
-                  variant="h4"
-                  fontWeight={900}
-                  sx={{ color: brand.navy, letterSpacing: 0 }}
-                >
-                  Create Account
-                </Typography>
+              {loading
+                ? "Creating account..."
+                : "Create Account"}
+            </Button>
 
-                <Typography sx={{ color: brand.muted, lineHeight: 1.65 }}>
-                  Sign up and access your modern ERP workspace.
-                </Typography>
-              </Stack>
+            <Button
+              fullWidth
+              startIcon={<LoginIcon />}
+              onClick={() => router.push("/signin")}
+              sx={{
+                mt: 1.5,
+                py: 1.3,
 
-              <Stack spacing={1.2}>
-                {success && <Alert severity="success">{success}</Alert>}
-                {error && <Alert severity="error">{error}</Alert>}
-              </Stack>
+                borderRadius: "12px",
 
-              <Controller
-                name="fullName"
-                control={control}
-                rules={{ required: "Full Name is required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Full Name"
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.fullName}
-                    helperText={errors.fullName?.message}
-                    sx={inputStyle}
-                  />
-                )}
-              />
+                textTransform: "none",
 
-              <Controller
-                name="email"
-                control={control}
-                rules={{
-                  required: "Email is required",
-                  pattern: {
-                    value: /^\S+@\S+\.\S+$/,
-                    message: "Invalid email format",
-                  },
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Email Address"
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                    sx={inputStyle}
-                  />
-                )}
-              />
+                fontWeight: 800,
 
-              <Controller
-                name="phoneNumber"
-                control={control}
-                rules={{ required: "Phone Number is required" }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Phone Number"
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.phoneNumber}
-                    helperText={errors.phoneNumber?.message}
-                    sx={inputStyle}
-                  />
-                )}
-              />
+                color: "#0f172a",
 
-              <Controller
-                name="password"
-                control={control}
-                rules={{
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "Password must be at least 6 characters",
-                  },
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    sx={inputStyle}
-                  />
-                )}
-              />
+                backgroundColor: "rgba(255,255,255,0.22)",
 
-              <Controller
-                name="confirmPassword"
-                control={control}
-                rules={{
-                  required: "Confirm your password",
-                  validate: (value) =>
-                    value === passwordValue || "Passwords do not match",
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Confirm Password"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    error={!!errors.confirmPassword}
-                    helperText={errors.confirmPassword?.message}
-                    sx={inputStyle}
-                  />
-                )}
-              />
+                border: `1px solid rgba(255,255,255,0.4)`,
 
-              <FormGroup sx={{ mt: 1 }}>
-                <FormControlLabel
-                  control={
-                    <Controller
-                      name="terms"
-                      control={control}
-                      rules={{ required: "You must accept the terms" }}
-                      render={({ field }) => (
-                        <Checkbox
-                          {...field}
-                          checked={field.value}
-                          sx={{
-                            color: brand.primary,
-                            "&.Mui-checked": {
-                              color: brand.primary,
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  }
-                  label={
-                    <Typography sx={{ color: brand.text, fontWeight: 600 }}>
-                      I agree to the Terms & Conditions
-                    </Typography>
-                  }
-                />
-                {errors.terms && (
-                  <Typography color="error" variant="body2">
-                    {errors.terms.message}
-                  </Typography>
-                )}
-              </FormGroup>
+                "&:hover": {
+                  backgroundColor:
+                    "rgba(255,255,255,0.32)",
 
-              <Button
-                type="submit"
-                onClick={handleSubmit(onSubmit)}
-                fullWidth
-                endIcon={<ArrowForwardIcon />}
-                disabled={loading}
-                sx={{
-                  mt: 3,
-                  py: 1.55,
-                  borderRadius: "8px",
-                  fontWeight: 900,
-                  textTransform: "none",
-                  color: "#ffffff",
-                  background:
-                    "linear-gradient(135deg, #2563eb 0%, #0891b2 100%)",
-                  boxShadow: "0 18px 38px rgba(37, 99, 235, 0.28)",
-                  transition: "all 0.28s ease",
-                  "&:hover": {
-                    transform: "translateY(-3px)",
-                    boxShadow: "0 24px 48px rgba(37, 99, 235, 0.36)",
-                    background:
-                      "linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%)",
-                  },
-                  "&.Mui-disabled": {
-                    color: "#ffffff",
-                    background: "#94a3b8",
-                  },
-                }}
-              >
-                {loading ? "Creating account..." : "Create Account"}
-              </Button>
-
-              <Button
-                fullWidth
-                startIcon={<LoginIcon />}
-                onClick={() => router.push("/signin")}
-                sx={{
-                  mt: 1.4,
-                  py: 1.25,
-                  borderRadius: "8px",
-                  textTransform: "none",
-                  fontWeight: 800,
-                  color: brand.navy,
-                  backgroundColor: "#ffffff",
-                  border: `1px solid ${brand.border}`,
-                  "&:hover": {
-                    backgroundColor: "#f8fafc",
-                    borderColor: brand.primary,
-                  },
-                }}
-              >
-                Already have an account? Login
-              </Button>
-
-              <Stack
-                direction="row"
-                spacing={0.8}
-                alignItems="center"
-                justifyContent="center"
-                sx={{ mt: 2.2 }}
-              >
-                <CheckCircleIcon sx={{ fontSize: 18, color: brand.emerald }} />
-                <Typography
-                  variant="body2"
-                  sx={{ color: brand.muted, fontWeight: 700 }}
-                >
-                  Secure signup with encrypted business data
-                </Typography>
-              </Stack>
-            </Box>
-          </Box>
+                  borderColor: brand.primary,
+                },
+              }}
+            >
+              Already have an account? Login
+            </Button>
+          </Paper>
         </Grid>
       </Grid>
     </Box>

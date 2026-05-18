@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import {
@@ -166,35 +167,118 @@ export default function CompanyForm() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg,#0f172a,#1e293b)",
-        py: 6
+
+        background:
+          "linear-gradient(135deg, #f0f9ff 0%, #dbeafe 45%, #bae6fd 100%)",
+
+        py: 6,
+
+        position: "relative",
+
+        overflow: "hidden",
+
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+
+          backgroundImage:
+            "linear-gradient(rgba(37,99,235,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.05) 1px, transparent 1px)",
+
+          backgroundSize: "42px 42px",
+        },
       }}
     >
+
+      {/* FLOATING CIRCLES */}
+
+      <Box
+        sx={{
+          position: "absolute",
+          width: 250,
+          height: 250,
+          borderRadius: "50%",
+          background: "rgba(37,99,235,0.10)",
+          top: -70,
+          left: -70,
+          filter: "blur(30px)",
+        }}
+      />
+
+      <Box
+        sx={{
+          position: "absolute",
+          width: 280,
+          height: 280,
+          borderRadius: "50%",
+          background: "rgba(8,145,178,0.10)",
+          bottom: -90,
+          right: -90,
+          filter: "blur(35px)",
+        }}
+      />
+
       <Container maxWidth="md">
+
         <Paper
           elevation={0}
           sx={{
             p: 4,
-            borderRadius: "20px",
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            color: "#fff"
+
+            borderRadius: "24px",
+
+            background: "rgba(255,255,255,0.40)",
+
+            backdropFilter: "blur(18px)",
+
+            border: "1px solid rgba(255,255,255,0.55)",
+
+            boxShadow: "0 20px 60px rgba(37,99,235,0.12)",
+
+            color: "#0f172a",
+
+            position: "relative",
+
+            zIndex: 2,
           }}
         >
 
-            {success && <Alert severity="success">{success}</Alert>}
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
           
-               {error && <Alert severity="error">{error}</Alert>}
-          
-          <Typography variant="h4" gutterBottom fontWeight="bold">
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+          <Typography
+            variant="h4"
+            gutterBottom
+            fontWeight="900"
+            sx={{
+              color: "#0f172a",
+              mb: 3,
+            }}
+          >
             Company Setup
           </Typography>
 
           <Box component="form" onSubmit={handleSubmit(onSubmit)}>
 
             {/* ---------- Basic Info ---------- */}
-            <Typography variant="h6" sx={{ mt: 2, color: "#cbd5f5" }}>
+
+            <Typography
+              variant="h6"
+              sx={{
+                mt: 2,
+                color: "#1e3a8a",
+                fontWeight: 700,
+              }}
+            >
               Basic Company Info
             </Typography>
 
@@ -264,22 +348,22 @@ export default function CompanyForm() {
             />
 
             <Controller
-  name="country"
-  control={control}
-  defaultValue="India" // <-- Set default value here
-  render={({ field }) => (
-    <TextField
-      {...field}
-      label="Country"
-      fullWidth
-      margin="normal"
-      sx={inputStyle}
-      InputProps={{
-        readOnly: true, // field is read-only
-      }}
-    />
-  )}
-/>
+              name="country"
+              control={control}
+              defaultValue="India"
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Country"
+                  fullWidth
+                  margin="normal"
+                  sx={inputStyle}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                />
+              )}
+            />
 
             <Controller
               name="state"
@@ -323,7 +407,15 @@ export default function CompanyForm() {
             />
 
             {/* ---------- Company Details ---------- */}
-            <Typography variant="h6" sx={{ mt: 4, color: "#cbd5f5" }}>
+
+            <Typography
+              variant="h6"
+              sx={{
+                mt: 4,
+                color: "#1e3a8a",
+                fontWeight: 700,
+              }}
+            >
               Company Details
             </Typography>
 
@@ -333,12 +425,31 @@ export default function CompanyForm() {
               fullWidth
               sx={{
                 mt: 2,
-                borderColor: "#475569",
-                color: "#cbd5f5",
-                "&:hover": { borderColor: "#6366f1" }
+                py: 1.5,
+
+                borderRadius: "14px",
+
+                borderColor: "#60a5fa",
+
+                color: "#1e3a8a",
+
+                background: "rgba(255,255,255,0.35)",
+
+                fontWeight: 700,
+
+                textTransform: "none",
+
+                transition: "0.3s ease",
+
+                "&:hover": {
+                  borderColor: "#2563eb",
+                  background: "rgba(255,255,255,0.45)",
+                  transform: "translateY(-2px)",
+                }
               }}
             >
               Upload Company Logo
+
               <input
                 type="file"
                 hidden
@@ -443,15 +554,39 @@ export default function CompanyForm() {
               type="submit"
               variant="contained"
               fullWidth
+              disabled={loading}
               sx={{
                 mt: 3,
-                py: 1.5,
-                borderRadius: "12px",
-                fontWeight: "bold",
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)"
+                py: 1.6,
+
+                borderRadius: "14px",
+
+                fontWeight: 900,
+
+                textTransform: "none",
+
+                color: "#ffffff",
+
+                background:
+                  "linear-gradient(135deg, #2563eb 0%, #0891b2 100%)",
+
+                boxShadow:
+                  "0 14px 30px rgba(37, 99, 235, 0.20)",
+
+                transition: "0.35s ease",
+
+                "&:hover": {
+                  transform: "translateY(-4px)",
+
+                  background:
+                    "linear-gradient(135deg, #1d4ed8 0%, #0e7490 100%)",
+
+                  boxShadow:
+                    "0 22px 45px rgba(37,99,235,0.28)",
+                },
               }}
             >
-              Save & Continue
+              {loading ? "Saving..." : "Save & Continue"}
             </Button>
 
           </Box>
@@ -462,13 +597,57 @@ export default function CompanyForm() {
 }
 
 const inputStyle = {
-  "& .MuiInputBase-input": { color: "#fff" },
-  "& .MuiSelect-select": { color: "#fff" },
-  "& .MuiInputLabel-root": { color: "#94a3b8" },
   "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: "#475569" },
-    "&:hover fieldset": { borderColor: "#6366f1" },
-    "&.Mui-focused fieldset": { borderColor: "#8b5cf6" }
+    borderRadius: "14px",
+
+    backgroundColor: "rgba(255,255,255,0.55)",
+
+    color: "#0f172a",
+
+    fontWeight: 600,
+
+    transition: "0.3s ease",
+
+    "& fieldset": {
+      borderColor: "rgba(255,255,255,0.55)",
+    },
+
+    "&:hover": {
+      transform: "translateY(-2px)",
+    },
+
+    "&:hover fieldset": {
+      borderColor: "#60a5fa",
+    },
+
+    "&.Mui-focused": {
+      transform: "scale(1.01)",
+    },
+
+    "&.Mui-focused fieldset": {
+      borderColor: "#2563eb",
+      borderWidth: "2px",
+    },
   },
-  "& .MuiSvgIcon-root": { color: "#fff" }
+
+  "& .MuiInputLabel-root": {
+    color: "#1e3a8a",
+    fontWeight: 700,
+  },
+
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "#2563eb",
+  },
+
+  "& input": {
+    color: "#0f172a",
+  },
+
+  "& textarea": {
+    color: "#0f172a",
+  },
+
+  "& .MuiSvgIcon-root": {
+    color: "#0f172a",
+  },
 };

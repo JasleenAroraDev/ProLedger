@@ -532,6 +532,7 @@
 //   );
 // }
 
+
 "use client";
 
 import {
@@ -566,43 +567,36 @@ export default function Home() {
 
   const brand = {
     navy: "#0f172a",
-    navySoft: "#1e293b",
     primary: "#2563eb",
     primaryDark: "#1d4ed8",
     cyan: "#0891b2",
-    cyanLight: "#e0f7ff",
+    cyanDark: "#0e7490",
     emerald: "#059669",
-    emeraldLight: "#dcfce7",
     amber: "#d97706",
-    amberLight: "#fef3c7",
     blueLight: "#dbeafe",
+    cyanLight: "#cffafe",
+    emeraldLight: "#dcfce7",
+    amberLight: "#fef3c7",
     surface: "#ffffff",
-    background: "#f8fafc",
     text: "#334155",
     muted: "#64748b",
     border: "#dbe5f0",
   };
 
   const fadeUp = keyframes`
-    from { opacity: 0; transform: translateY(30px); }
+    from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
   `;
 
   const floatCard = keyframes`
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-12px); }
-    100% { transform: translateY(0px); }
-  `;
-
-  const pulse = keyframes`
-    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.24); }
-    70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
   `;
 
   const shine = keyframes`
-    0% { transform: translateX(-140%); }
-    100% { transform: translateX(140%); }
+    0% { transform: translateX(-120%); }
+    100% { transform: translateX(160%); }
   `;
 
   const barGrow = keyframes`
@@ -614,14 +608,14 @@ export default function Home() {
     {
       icon: <TrendingUpIcon />,
       title: "Sales Growth",
-      text: "Track billing, revenue, profit, and pending payments in real time.",
+      text: "Track revenue, profit, payments, and billing performance.",
       color: brand.primary,
       bg: brand.blueLight,
     },
     {
       icon: <AccountBalanceIcon />,
       title: "Accounting Control",
-      text: "Manage GST invoices, ledgers, expenses, and financial reports.",
+      text: "Manage GST invoices, ledgers, expenses, and reports.",
       color: brand.emerald,
       bg: brand.emeraldLight,
     },
@@ -634,33 +628,51 @@ export default function Home() {
     },
   ];
 
+  const stats = [
+    ["₹2.48L", "Today Sales", brand.blueLight, brand.primary, "82%"],
+    ["186", "Invoices", brand.emeraldLight, brand.emerald, "68%"],
+    ["94%", "Stock Health", brand.amberLight, brand.amber, "94%"],
+  ];
+
   return (
     <Box
       sx={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at 8% 12%, rgba(37,99,235,0.13), transparent 30%), radial-gradient(circle at 88% 18%, rgba(8,145,178,0.12), transparent 28%), linear-gradient(135deg, #f8fafc 0%, #eef6ff 45%, #ecfeff 100%)",
+          "linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #ecfeff 100%)",
         display: "flex",
         alignItems: "center",
-        py: { xs: 4, md: 7 },
+        py: { xs: 4, md: 6 },
         overflow: "hidden",
+        position: "relative",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(rgba(37,99,235,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.055) 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+          maskImage:
+            "linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.15))",
+        },
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Grid container spacing={{ xs: 5, md: 7 }} alignItems="center">
           <Grid item xs={12} md={6}>
             <Stack spacing={3} sx={{ animation: `${fadeUp} 0.75s ease both` }}>
               <Box>
                 <img
-  src="/proLedgerLogo.png"
-  alt="ProLedger Logo"
-  style={{
-    width: "350px",
-    // height: "auto",
-    // display: "block",
-  }}
-/>
-
+                  src="/proLedgerLogo.png"
+                  alt="ProLedger Logo"
+                  style={{
+                    width: "280px",
+                    maxWidth: "100%",
+                    height: "auto",
+                    display: "block",
+                    objectFit: "contain",
+                  }}
+                />
               </Box>
 
               <Chip
@@ -670,16 +682,13 @@ export default function Home() {
                   width: "fit-content",
                   maxWidth: "100%",
                   borderRadius: "8px",
-                  backgroundColor: brand.surface,
+                  backgroundColor: "#ffffff",
                   color: brand.primaryDark,
                   fontWeight: 900,
                   border: `1px solid ${brand.blueLight}`,
-                  boxShadow: "0 12px 30px rgba(37, 99, 235, 0.12)",
-                  animation: `${pulse} 2.6s infinite`,
+                  boxShadow: "0 12px 28px rgba(37, 99, 235, 0.1)",
                   px: 1,
-                  "& .MuiChip-icon": {
-                    color: brand.primary,
-                  },
+                  "& .MuiChip-icon": { color: brand.primary },
                 }}
               />
 
@@ -688,27 +697,27 @@ export default function Home() {
                   variant="h2"
                   fontWeight={900}
                   sx={{
-                    fontSize: { xs: "2.28rem", sm: "2.95rem", md: "3.72rem" },
+                    fontSize: { xs: "2.25rem", sm: "2.9rem", md: "3.65rem" },
                     lineHeight: 1.04,
                     letterSpacing: 0,
                     color: brand.navy,
                   }}
                 >
-                  Modern ERP for Billing, Accounting & Inventory
+                  Run Billing, Accounting & Inventory From One ERP
                 </Typography>
 
                 <Typography
                   sx={{
                     mt: 2.2,
                     color: brand.text,
-                    fontSize: { xs: "1.02rem", md: "1.16rem" },
+                    fontSize: { xs: "1.02rem", md: "1.15rem" },
                     lineHeight: 1.75,
-                    maxWidth: 570,
+                    maxWidth: 580,
                   }}
                 >
-                  ProLedger gives your business a beautiful control center for
-                  invoices, accounts, stock, customers, suppliers, GST reports,
-                  and complete business analytics.
+                  ProLedger gives growing businesses a clean command center for
+                  invoices, GST reports, customers, suppliers, stock, payments,
+                  and business analytics.
                 </Typography>
               </Box>
 
@@ -736,7 +745,7 @@ export default function Home() {
                     },
                   }}
                 >
-                  Start Free Trial
+                  Create Account
                 </Button>
 
                 <Button
@@ -766,30 +775,49 @@ export default function Home() {
                 </Button>
               </Stack>
 
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={{ xs: 1.2, sm: 2.4 }}
-                divider={
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    sx={{
-                      display: { xs: "none", sm: "block" },
-                      borderColor: brand.border,
-                    }}
-                  />
-                }
-                sx={{ pt: 1, color: brand.text }}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 1.5,
+                  borderRadius: "8px",
+                  backgroundColor: "rgba(255,255,255,0.78)",
+                  border: `1px solid ${brand.border}`,
+                }}
               >
-                {["GST Ready", "Fast Billing", "Live Reports"].map((item) => (
-                  <Stack key={item} direction="row" spacing={0.8} alignItems="center">
-                    <CheckCircleIcon sx={{ fontSize: 18, color: brand.emerald }} />
-                    <Typography fontWeight={900} fontSize="0.95rem">
-                      {item}
-                    </Typography>
-                  </Stack>
-                ))}
-              </Stack>
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={{ xs: 1.2, sm: 2.2 }}
+                  divider={
+                    <Divider
+                      orientation="vertical"
+                      flexItem
+                      sx={{ display: { xs: "none", sm: "block" } }}
+                    />
+                  }
+                >
+                  {["GST Ready", "Fast Billing", "Live Reports"].map((item) => (
+                    <Stack
+                      key={item}
+                      direction="row"
+                      spacing={0.8}
+                      alignItems="center"
+                    >
+                      <CheckCircleIcon
+                        sx={{ fontSize: 18, color: brand.emerald }}
+                      />
+                      <Typography
+                        sx={{
+                          color: brand.text,
+                          fontWeight: 900,
+                          fontSize: "0.95rem",
+                        }}
+                      >
+                        {item}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Paper>
             </Stack>
           </Grid>
 
@@ -802,7 +830,7 @@ export default function Home() {
                   borderRadius: "8px",
                   background: "rgba(255, 255, 255, 0.94)",
                   border: `1px solid ${brand.blueLight}`,
-                  boxShadow: "0 32px 90px rgba(15, 23, 42, 0.15)",
+                  boxShadow: "0 34px 90px rgba(15, 23, 42, 0.16)",
                   backdropFilter: "blur(18px)",
                   position: "relative",
                   overflow: "hidden",
@@ -810,15 +838,20 @@ export default function Home() {
                     content: '""',
                     position: "absolute",
                     inset: 0,
-                    width: "46%",
+                    width: "42%",
                     background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)",
-                    animation: `${shine} 4.2s ease-in-out infinite`,
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.72), transparent)",
+                    animation: `${shine} 4.4s ease-in-out infinite`,
                   },
                 }}
               >
                 <Stack spacing={2.4} sx={{ position: "relative", zIndex: 1 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    spacing={2}
+                  >
                     <Box>
                       <Typography sx={{ fontWeight: 900, color: brand.navy }}>
                         ProLedger ERP Dashboard
@@ -844,19 +877,15 @@ export default function Home() {
                   </Stack>
 
                   <Grid container spacing={1.4}>
-                    {[
-                      ["₹2.48L", "Sales", brand.blueLight, brand.primary, "82%"],
-                      ["186", "Invoices", brand.emeraldLight, brand.emerald, "68%"],
-                      ["94%", "Stock", brand.amberLight, brand.amber, "94%"],
-                    ].map(([value, label, bg, color, width]) => (
+                    {stats.map(([value, label, bg, color, width]) => (
                       <Grid item xs={4} key={label}>
                         <Box
                           sx={{
-                            minHeight: 104,
-                            p: 1.35,
+                            minHeight: 108,
+                            p: { xs: 1.1, sm: 1.35 },
                             borderRadius: "8px",
                             backgroundColor: bg,
-                            border: "1px solid rgba(203, 213, 225, 0.75)",
+                            border: "1px solid rgba(203, 213, 225, 0.8)",
                             transition: "all 0.28s ease",
                             "&:hover": {
                               transform: "translateY(-5px)",
@@ -864,14 +893,30 @@ export default function Home() {
                             },
                           }}
                         >
-                          <Typography sx={{ fontWeight: 900, color, fontSize: "1.22rem" }}>
+                          <Typography
+                            sx={{
+                              fontWeight: 900,
+                              color,
+                              fontSize: { xs: "1rem", sm: "1.22rem" },
+                            }}
+                          >
                             {value}
                           </Typography>
-                          <Typography variant="caption" sx={{ color: brand.text, fontWeight: 800 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: brand.text, fontWeight: 800 }}
+                          >
                             {label}
                           </Typography>
 
-                          <Box sx={{ mt: 1.2, height: 6, borderRadius: 20, background: "#ffffff" }}>
+                          <Box
+                            sx={{
+                              mt: 1.2,
+                              height: 6,
+                              borderRadius: 20,
+                              background: "#ffffff",
+                            }}
+                          >
                             <Box
                               sx={{
                                 "--bar-width": width,
@@ -897,7 +942,7 @@ export default function Home() {
                     }}
                   >
                     <img
-                      src="/landingPhoto.png"
+                      src="/landingImage.png"
                       alt="ERP Dashboard Illustration"
                       style={{
                         width: "100%",
@@ -910,9 +955,24 @@ export default function Home() {
 
                   <Grid container spacing={1.3}>
                     {[
-                      { icon: <ReceiptLongIcon />, label: "Billing", color: brand.primary, bg: brand.blueLight },
-                      { icon: <AssessmentIcon />, label: "Reports", color: brand.cyan, bg: brand.cyanLight },
-                      { icon: <PeopleAltIcon />, label: "Customers", color: brand.emerald, bg: brand.emeraldLight },
+                      {
+                        icon: <ReceiptLongIcon />,
+                        label: "Billing",
+                        color: brand.primary,
+                        bg: brand.blueLight,
+                      },
+                      {
+                        icon: <AssessmentIcon />,
+                        label: "Reports",
+                        color: brand.cyan,
+                        bg: brand.cyanLight,
+                      },
+                      {
+                        icon: <PeopleAltIcon />,
+                        label: "Customers",
+                        color: brand.emerald,
+                        bg: brand.emeraldLight,
+                      },
                     ].map((item) => (
                       <Grid item xs={4} key={item.label}>
                         <Stack
@@ -943,7 +1003,10 @@ export default function Home() {
                           >
                             {item.icon}
                           </Box>
-                          <Typography variant="caption" sx={{ color: brand.text, fontWeight: 900 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{ color: brand.text, fontWeight: 900 }}
+                          >
                             {item.label}
                           </Typography>
                         </Stack>
@@ -993,7 +1056,10 @@ export default function Home() {
                         <Typography fontWeight={900} color={brand.navy}>
                           {item.title}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: brand.muted, lineHeight: 1.55 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: brand.muted, lineHeight: 1.55 }}
+                        >
                           {item.text}
                         </Typography>
                       </Box>
